@@ -10,7 +10,6 @@ import java.util.Set;
 @Entity
 @Table(name="t_project",schema = "semantic")
 public class Project {
-    @GeneratedValue
     @Id
     @Column(name="project_id_tk")
     private BigInteger projectIdTk;

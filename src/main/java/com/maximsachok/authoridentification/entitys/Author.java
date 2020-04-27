@@ -6,14 +6,14 @@ import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.math.BigInteger;
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "t_expert", schema = "semantic")
+@Table(name = "t_expert", schema = "semantic", indexes = @Index(name = "t_expert_expert_id_tk_idx", columnList = "expert_id_tk", unique = true))
 public class Author {
     @Id
-    @GeneratedValue
     @Column(name = "expert_id_tk")
     private BigInteger expertidtk;
 
@@ -42,7 +42,7 @@ public class Author {
     private String email;
 
     @Column(name = "create_time")
-    private Date createTime;
+    private LocalDateTime createTime;
 
     @Column(name = "vedidk")
     private BigInteger vedidk;
@@ -145,11 +145,11 @@ public class Author {
         this.email = email;
     }
 
-    public Date getCreateTime() {
+    public LocalDateTime getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Date createTime) {
+    public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
     }
 

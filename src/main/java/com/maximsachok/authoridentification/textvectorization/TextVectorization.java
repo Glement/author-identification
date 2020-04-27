@@ -72,16 +72,16 @@ public class TextVectorization {
         }
         ProjectDto project = new ProjectDto();
         project.setDescEn(allProject.toString());
-        return mapProject(project);
+        Map<String, Double> projectsMap =  mapProject(project);
+        projectsMap.put("Number of Projects", (double)projects.size());
+        return projectsMap;
     }
 
-    public Map<String, Double> calculateTfIdf(List<Project> corpus, Map<String,Double> document){
-        double documentCount = corpus.size();
+    public Map<String, Double> calculateTfIdf(double numberOfProjects, Map<String,Double> document, Map<String,Double> projects){
         Map<String,Double> result = new HashMap<>();
-        Map<String,Double> projects = mapProjects(corpus);
         for(String key : projects.keySet()){
             if(document.containsKey(key))
-                result.put(key, document.get(key)*Math.log((documentCount/(projects.get(key)+1))));
+                result.put(key, document.get(key)*Math.log((numberOfProjects/(projects.get(key)+1))));
         }
         return result;
     }

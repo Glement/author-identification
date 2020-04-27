@@ -45,8 +45,13 @@ public class Controller {
     }
     @GetMapping("/vectorall")
     public ResponseEntity<?> updateAll() {
-        authorService.updateAllAuthors();
-        return (ResponseEntity<?>) ResponseEntity.ok();
+        return ResponseEntity.ok(authorService.updateAllAuthors());
+    }
+    @GetMapping("/test")
+    public ResponseEntity<?> test() {
+        long startTime = System.currentTimeMillis();
+        authorService.findAuthorById(BigInteger.valueOf(10));
+        return ResponseEntity.ok(">> Time took to find author "+(System.currentTimeMillis() - startTime)+" ms");
     }
 
 }
