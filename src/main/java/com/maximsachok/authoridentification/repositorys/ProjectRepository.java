@@ -1,11 +1,12 @@
 package com.maximsachok.authoridentification.repositorys;
 
 import com.maximsachok.authoridentification.entitys.Project;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.math.BigInteger;
 import java.util.Collection;
 
-public interface ProjectRepository extends CrudRepository<Project, BigInteger> {
+@Repository
+public interface ProjectRepository extends JpaRepository<Project, BigInteger> {
 }

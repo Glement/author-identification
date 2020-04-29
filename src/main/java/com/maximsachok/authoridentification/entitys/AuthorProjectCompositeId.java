@@ -2,25 +2,24 @@ package com.maximsachok.authoridentification.entitys;
 
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Objects;
 
 public class AuthorProjectCompositeId implements Serializable {
-    private BigInteger expertId;
+    private Author author;
 
-    private BigInteger projectId;
+    private Project project;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AuthorProjectCompositeId that = (AuthorProjectCompositeId) o;
-        return Objects.equals(expertId, that.expertId) &&
-                Objects.equals(projectId, that.projectId);
+        return Objects.equals(author, that.author) &&
+                Objects.equals(project, that.project);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(expertId, projectId);
+        return Objects.hash(author, project);
     }
 }

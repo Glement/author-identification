@@ -2,7 +2,9 @@ package com.maximsachok.authoridentification.repositorys;
 
 import com.maximsachok.authoridentification.entitys.AuthorProject;
 import com.maximsachok.authoridentification.entitys.AuthorProjectCompositeId;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface AuthorProjectRepository extends CrudRepository<AuthorProject, AuthorProjectCompositeId> {
+@Repository
+public interface AuthorProjectRepository extends JpaRepository<AuthorProject, AuthorProjectCompositeId> {
 }

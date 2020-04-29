@@ -49,12 +49,12 @@ public class AuthorService {
         long startTime = System.currentTimeMillis();
         double[] textWordVec = textVectorization.vectoriseProjects(projects);
         Map<String, Double> textTf = textVectorization.mapProjects(projects);
-        //logger.info(">> Time took to compute Word2Vec and Tf  => {} ms", (System.currentTimeMillis() - startTime));
+        logger.info(">> Time took to compute Word2Vec and Tf  => {} ms", (System.currentTimeMillis() - startTime));
         try{
             startTime = System.currentTimeMillis();
             author.setExpertWordVec(objectMapper.writeValueAsString(textWordVec));
             author.setExpertTf(objectMapper.writeValueAsString(textTf));
-            //logger.info(">> Time took to transform vectors to json  => {} ms", (System.currentTimeMillis() - startTime));
+            logger.info(">> Time took to transform vectors to json  => {} ms", (System.currentTimeMillis() - startTime));
             return author;
         }
         catch (JsonProcessingException ignored){
@@ -85,86 +85,24 @@ public class AuthorService {
         logger.info(">> Time took to update all authors  => {} ms  {} authors", (System.currentTimeMillis() - startTime), authors.size());
     }
 
-    public void testall(){
-        Map<BigInteger, Set<BigInteger>> authorProjectsMap = new HashMap<>();
-        Map<BigInteger,Project> projectsMap = new HashMap<>();
-        loadProjects(authorProjectsMap, projectsMap);
-        long startTime;
-        List<Author> authorList = new ArrayList<>();
-        for(Author it : authorRepository.findAll()){
-            Map<String, BigInteger> text1 = new HashMap<>();
-            double[] wordvec1 = new double[300];
-            Map<String, BigInteger> text2 = new HashMap<>();
-            double[] wordvec2 = new double[300];
-            startTime = System.currentTimeMillis();
-            List<Project> projects = new ArrayList<>();
-            if(authorProjectsMap.containsKey(it.getExpertidtk())){
-                for(BigInteger integer : authorProjectsMap.get(it.getExpertidtk())){
-                    if(projectsMap.containsKey(integer))
-                        projects.add(projectsMap.get(integer));
-                }
-            }
-            if(projects.isEmpty())
-                continue;
-            try{
-                wordvec1 = objectMapper.readValue(it.getExpertWordVec(), double[].class);
-                text1 = objectMapper.readValue(it.getExpertTf(), new TypeReference<Map<String,BigInteger>>(){});
-            }
-            catch (JsonProcessingException ex){
-                logger.info("Error on author with id {}", it.getExpertidtk());
-            }
-            Author author = update(it, projects);
-            try{
-                wordvec2 = objectMapper.readValue(author.getExpertWordVec(), double[].class);
-                text2 = objectMapper.readValue(author.getExpertTf(), new TypeReference<Map<String,BigInteger>>(){});
-            }
-            catch (JsonProcessingException ex){
-                logger.info("Error on author with id {}", it.getExpertidtk());
-            }
-            if(wordvec1.length!=300 || wordvec2.length!=300){
-                logger.info("Error on author with id {}", it.getExpertidtk());
-            }
-            for(int i=0;i<wordvec1.length;++i){
-                if(wordvec1[i]!=wordvec2[i]){
-                    logger.info("Author {} have wrong word2vec in db, have {}\n must have {}", author.getExpertidtk(), wordvec1, wordvec2);
-                    break;
-                }
-            }
-            if(text1.size()!=text2.size() || text1.size()<1 || text2.size()<1){
-                logger.info("Error on author with id {}", it.getExpertidtk());
-            }
-            for(String k : text1.keySet()){
-                if(!text2.containsKey(k)){
-                    logger.info("Author {} have wrong tf in db, have {}\n must have {}", author.getExpertidtk(), text1, text2);
-                    break;
-                }
-            }
-
-
-        }
-    }
-
+    @Transactional
     public String updateAllAuthors() {
-        Map<BigInteger, Set<BigInteger>> authorProjectsMap = new HashMap<>();
-        Map<BigInteger,Project> projectsMap = new HashMap<>();
-        loadProjects(authorProjectsMap, projectsMap);
         long startTime;
         List<Author> authorList = new ArrayList<>();
         for(Author it : authorRepository.findAll()){
             startTime = System.currentTimeMillis();
             List<Project> projects = new ArrayList<>();
-            if(authorProjectsMap.containsKey(it.getExpertidtk())){
-                for(BigInteger integer : authorProjectsMap.get(it.getExpertidtk())){
-                    if(projectsMap.containsKey(integer))
-                        projects.add(projectsMap.get(integer));
-                }
+            for(AuthorProject authorProject : it.getAuthorProjects()){
+                projects.add(authorProject.getProject());
             }
             if(projects.isEmpty())
                 continue;
 
             if(update(it, projects) != null)
                 authorList.add(it);
-
+            /*it.setExpertTf(" ");
+            it.setExpertWordVec(" ");
+            authorList.add(it);*/
             /*if(author != null)
                 authorRepository.save(author);*/
 
@@ -176,30 +114,36 @@ public class AuthorService {
         return (">> Time took to save authors  =>"+(System.currentTimeMillis() - startTime)+"ms, size =>"+ authorList.size());
     }
 
-    public Optional<Author> findAuthorById(BigInteger id){
-        return authorRepository.findById(id);
+    public String testing(){
+        long startTime = System.currentTimeMillis();
+        for(long i=0;i<10000;i++){
+            startTime = System.currentTimeMillis();
+            Optional<Author> author = authorRepository.findById(i);
+            if(!author.isPresent())
+                continue;
+            author.get().setExpertWordVec("");
+            author.get().setExpertTf("");
+            authorRepository.save(author.get());
+            logger.info(">> Time took to save author  => {} ms", (System.currentTimeMillis() - startTime));
+        }
+        return "ok";
     }
+
+    public String testingTime(){
+        long startTime = System.currentTimeMillis();
+            startTime = System.currentTimeMillis();
+            Optional<Author> author = authorRepository.findById(10L);
+            if(!author.isPresent())
+                return "bad";
+            author.get().setExpertWordVec("");
+            author.get().setExpertTf("");
+            authorRepository.save(author.get());
+            logger.info(">> Time took to save author  => {} ms", (System.currentTimeMillis() - startTime));
+        return "ok";
+    }
+
     public Iterable<Author> findAllAuthors(){
         return authorRepository.findAll();
-    }
-
-
-    private void loadProjects(Map<BigInteger, Set<BigInteger>> authorProjectsMap, Map<BigInteger,Project> projectsMap){
-        Iterable<Author> authorIterable = authorRepository.findAll();
-        Iterable<Project> projectIterable = projectRepository.findAll();
-        Iterable<AuthorProject> authorProjectsIterable = authorProjectRepository.findAll();
-        for(AuthorProject authorProject : authorProjectsIterable){
-            if(authorProjectsMap.containsKey(authorProject.getExpertId()))
-                authorProjectsMap.get(authorProject.getExpertId()).add(authorProject.getProjectId());
-            else{
-                Set<BigInteger> set = new HashSet<>();
-                set.add(authorProject.getProjectId());
-                authorProjectsMap.put(authorProject.getExpertId(),set);
-            }
-        }
-        for(Project project : projectIterable){
-            projectsMap.put(project.getProjectIdTk(), project);
-        }
     }
 
     public Response findPossibleAuthor(ProjectDto project) {
@@ -237,35 +181,29 @@ public class AuthorService {
         CosineSimilarity similarity = new CosineSimilarity();
 
         TextVectorization textVectorization = new TextVectorization();
-        double[] text1Word2Vec = textVectorization.vectoriseProject(project);
-        Map<String, Double> text1TF = textVectorization.mapProject(project);
-        Map<BigInteger, Set<BigInteger>> authorProjectsMap = new HashMap<>();
-        Map<BigInteger,Project> projectsMap = new HashMap<>();
-        loadProjects(authorProjectsMap, projectsMap);
+        double[] projectWord2Vec = textVectorization.vectoriseProject(project);
+        Map<String, Double> projectTF = textVectorization.mapProject(project);
         for(Author author : findAllAuthors())
         {
-            Map<String, Double> text2TF;
-            double[] text2Word2Vec;
+            Map<String, Double> authorTF;
+            double[] authorWord2Vec;
             List<Project> projects = new ArrayList<>();
-            if(authorProjectsMap.containsKey(author.getExpertidtk())){
-                for(BigInteger integer : authorProjectsMap.get(author.getExpertidtk())){
-                    if(projectsMap.containsKey(integer))
-                        projects.add(projectsMap.get(integer));
-                }
+            for(AuthorProject authorProject : author.getAuthorProjects()){
+                projects.add(authorProject.getProject());
             }
 
             if(projects.isEmpty())
                 continue;
 
-            text2TF = textVectorization.mapProjects(projects);
-            text2Word2Vec = textVectorization.vectoriseProjects(projects);
+            authorTF = textVectorization.mapProjects(projects);
+            authorWord2Vec = textVectorization.vectoriseProjects(projects);
 
-            if(text2Word2Vec.length==300 && !text2TF.isEmpty()){
-                Map<String, Double> projectTfIdf = textVectorization.calculateTfIdf((double)projects.size(),text1TF,text2TF);
+            if(authorWord2Vec.length==300 && !authorTF.isEmpty()){
+                Map<String, Double> projectIDF = textVectorization.calculateTfIdf((double)projects.size(),projectTF,authorTF);
                 Result result = new Result();
                 result.setAuthorID(author.getExpertidtk());
-                result.setTfScore(similarity.compareTwoMaps(projectTfIdf,text2TF));
-                result.setWordScore(similarity.compareTwoVectors(text1Word2Vec,text2Word2Vec));
+                result.setTfScore(similarity.compareTwoMaps(projectIDF,authorTF));
+                result.setWordScore(similarity.compareTwoVectors(projectWord2Vec,authorWord2Vec));
                 wordVecTop.addItem(result);
                 tfTop.addItem(result);
                 bothTop.addItem(result);

@@ -6,7 +6,7 @@ import java.math.BigInteger;
 public class Result implements Serializable {
     private Double wordScore;
     private Double tfScore;
-    private BigInteger authorID;
+    private long authorID;
 
     public Double getWordScore() {
         return wordScore;
@@ -24,11 +24,11 @@ public class Result implements Serializable {
         this.tfScore = tfScore;
     }
 
-    public BigInteger getAuthorID() {
+    public long getAuthorID() {
         return authorID;
     }
 
-    public void setAuthorID(BigInteger authorID) {
+    public void setAuthorID(long authorID) {
         this.authorID = authorID;
     }
 

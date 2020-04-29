@@ -1,6 +1,7 @@
 package com.maximsachok.authoridentification.restcontroller;
 
 import com.maximsachok.authoridentification.dto.Response;
+import com.maximsachok.authoridentification.entitys.Author;
 import com.maximsachok.authoridentification.entitys.AuthorProject;
 import com.maximsachok.authoridentification.entitys.Project;
 import com.maximsachok.authoridentification.dto.ProjectDto;
@@ -44,14 +45,11 @@ public class Controller {
         return ResponseEntity.ok(stud);
     }
     @GetMapping("/vectorall")
-    public ResponseEntity<?> updateAll() {
-        return ResponseEntity.ok(authorService.updateAllAuthors());
-    }
-    @GetMapping("/test")
-    public ResponseEntity<?> test() {
+    public ResponseEntity<?> updateAll()
+    {
         long startTime = System.currentTimeMillis();
-        authorService.findAuthorById(BigInteger.valueOf(10));
-        return ResponseEntity.ok(">> Time took to find author "+(System.currentTimeMillis() - startTime)+" ms");
+        authorService.updateAllAuthors();
+        return ResponseEntity.ok("Done in "+(System.currentTimeMillis()-startTime));
     }
 
 }

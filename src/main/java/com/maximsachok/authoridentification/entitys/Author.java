@@ -2,12 +2,11 @@ package com.maximsachok.authoridentification.entitys;
 
 
 
+
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.math.BigInteger;
-import java.sql.Date;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -15,7 +14,10 @@ import java.util.Set;
 public class Author {
     @Id
     @Column(name = "expert_id_tk")
-    private BigInteger expertidtk;
+    private Long  expertidtk;
+
+    @OneToMany(mappedBy = "author", fetch = FetchType.EAGER)
+    private Set<AuthorProject> authorProjects;
 
     @Column(name = "expert_bk")
     private String expertbk;
@@ -73,6 +75,14 @@ public class Author {
     @Column(name="claim_bk")
     private String claimBk;
 
+    public Set<AuthorProject> getAuthorProjects() {
+        return authorProjects;
+    }
+
+    public void setAuthorProjects(Set<AuthorProject> authorProjects) {
+        this.authorProjects = authorProjects;
+    }
+
     public String getExpertWordVec() {
         return expertWordVec;
     }
@@ -89,11 +99,11 @@ public class Author {
         this.expertTf = expertTf;
     }
 
-    public BigInteger getExpertidtk() {
+    public Long getExpertidtk() {
         return expertidtk;
     }
 
-    public void setExpertidtk(BigInteger expertidtk) {
+    public void setExpertidtk(Long expertidtk) {
         this.expertidtk = expertidtk;
     }
 

@@ -28,6 +28,8 @@ public class CosineSimilarity {
     public double compareTwoMaps(final Map<String,Double> leftVector,final  Map<String,Double> rightVector) {
 
         final Set<String> intersection = getIntersection(leftVector, rightVector);
+        if(intersection.isEmpty())
+            return -1.0d;
         final double dotProduct = dot(leftVector, rightVector, intersection);
         double d1 = 0.0d;
         for (final Double value : leftVector.values()) {
@@ -39,7 +41,7 @@ public class CosineSimilarity {
         }
         double cosineSimilarity;
         if (d1 <= 0.0 || d2 <= 0.0) {
-            cosineSimilarity = 0.0;
+            cosineSimilarity = -1.0d;
             } else {
             cosineSimilarity = dotProduct / (Math.sqrt(d1) * Math.sqrt(d2));
             }
@@ -54,7 +56,7 @@ public class CosineSimilarity {
 
     private double dot(final Map<String, Double> leftVector, final Map<String, Double> rightVector,
                        final Set<String> intersection) {
-        double dotProduct = 0;
+        double dotProduct = 0.0d;
         for (final String key : intersection) {
             dotProduct += leftVector.get(key) * rightVector.get(key);
         }

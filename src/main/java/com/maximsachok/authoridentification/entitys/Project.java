@@ -12,7 +12,10 @@ import java.util.Set;
 public class Project {
     @Id
     @Column(name="project_id_tk")
-    private BigInteger projectIdTk;
+    private Long  projectIdTk;
+
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
+    private Set<AuthorProject> authorProjects;
 
     @Column(name="id_t_project_program")
     private BigInteger idProjectProgram;
@@ -56,11 +59,11 @@ public class Project {
     @Column(name="project_type")
     private String type;
 
-    public BigInteger getProjectIdTk() {
+    public Long getProjectIdTk() {
         return projectIdTk;
     }
 
-    public void setProjectIdTk(BigInteger projectIdTk) {
+    public void setProjectIdTk(Long projectIdTk) {
         this.projectIdTk = projectIdTk;
     }
 
