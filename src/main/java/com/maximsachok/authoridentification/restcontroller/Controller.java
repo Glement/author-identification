@@ -9,9 +9,11 @@ import com.maximsachok.authoridentification.dto.Result;
 import com.maximsachok.authoridentification.repositorys.AuthorRepository;
 import com.maximsachok.authoridentification.services.AuthorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigInteger;
 import java.util.HashSet;
@@ -29,7 +31,7 @@ public class Controller {
         this.authorService = authorService;
     }
 
-    @PostMapping("/score")
+    @PostMapping("/find")
     public ResponseEntity<Response> findScore(@Validated @RequestBody ProjectDto project) {
         Response response;
         response = authorService.findPossibleAuthor(project);
@@ -39,12 +41,15 @@ public class Controller {
             return ResponseEntity.ok(response);
         return ResponseEntity.of(Optional.empty());
     }
-    @PutMapping("/vector-{id}")
-    public ResponseEntity<String> updateVector(@RequestParam int authorID) {
-        String stud = "";
-        return ResponseEntity.ok(stud);
+    @PutMapping("/update-{id}")
+    public ResponseEntity<String> updateVector(@RequestParam long authorID) {
+       if(authorService.updateAuthor(authorID))
+           return ResponseEntity.ok("Updated");
+        throw new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Author not found"
+        );
     }
-    @GetMapping("/vectorall")
+    @GetMapping("/updateall")
     public ResponseEntity<?> updateAll()
     {
         long startTime = System.currentTimeMillis();
