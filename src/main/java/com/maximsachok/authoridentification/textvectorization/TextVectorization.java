@@ -17,7 +17,7 @@ public class TextVectorization {
     /**
      * Vectorizes given project in to double array of a size 300 using word2vec model.
      * @see WordModel
-     * @param project
+     * @param project Project for which to find author.
      * @return simple double array of size 300
      */
     public double[] vectoriseProject(ProjectDto project)

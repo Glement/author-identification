@@ -33,7 +33,7 @@ public class Controller {
 
     /**
      *Finds the possible author for a given project.
-     * @param project
+     * @param project Project for which to find an author
      * @return Returns
      * @see Response
      * which contains the last 10 authors with the highest similarity scores.
@@ -47,7 +47,7 @@ public class Controller {
 
     /**
      * Updates vectors for a given author.
-     * @param authorID
+     * @param authorID Authors id for which to update vectors.
      * @return If author was found returns status.ok, if not throws an exception.
      */
     @PutMapping("/update/{id}")

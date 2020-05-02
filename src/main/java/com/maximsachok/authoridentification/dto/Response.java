@@ -10,8 +10,8 @@ import java.util.ArrayList;
  * @see Result#getTfScore()
  * or
  * @see Result#getWordScore()
- *or both of them with the priorioty of
- * @see Result#getWordScore().
+ * or both of them with the priorioty of
+ * @see Result#getWordScore()
  * Sorted in descending orde. The lower the score, the lower the possibility that this author is the author of given project.
  */
 public class Response {

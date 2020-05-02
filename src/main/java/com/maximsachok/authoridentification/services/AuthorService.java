@@ -65,7 +65,7 @@ public class AuthorService {
     /**
      * Updates vectors for a given authors id
      * @param id Authors id for which to update vectors
-     * @return
+     * @return returns true if author exists, false if not.
      */
     public Boolean updateAuthor(long id){
         if(!authorRepository.findById(id).isPresent())
