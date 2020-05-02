@@ -7,6 +7,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * Author identification.
+ * The AuthorIdentification application
+ * is an application that helps to determine an author for a given Project(text)
+ * based on texts semantic similarity and word use (TF-IDF).
+ * This application is using dl4j <a href="https://deeplearning4j.org">deeplearning4j</a> Word2Vec implementation library for converting words in to vectors of 300 dimensions.
+ * Using pre-trained Google news <a href="https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing">model</a>.
+ * @author  Maxim Sachok
+ * @version 1.0
+ * @since   2020-05-02
+ */
 @SpringBootApplication
 public class AuthorIdentificationApplication {
 

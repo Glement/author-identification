@@ -13,8 +13,17 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class to get access to Stop Word resource.
+ * Using <a href="https://algs4.cs.princeton.edu/35applications/stopwords.txt">stopwords</a>.
+ */
 public class StopWords {
     private static List<String> words = null;
+
+    /**
+     *
+     * @return If resource can not be loaded, returns null. Else returns List of stop words.
+     */
     public static List<String> getStopWords() {
         if(words == null)
             ReadWords();
@@ -27,7 +36,7 @@ public class StopWords {
             Resource resource = resourceLoader.getResource("classpath:/static/stopwords.txt");
             BufferedReader br = new BufferedReader(new InputStreamReader(resource.getInputStream()));
 
-            String line = null;
+            String line;
 
             while ((line = br.readLine()) != null) {
                 words.add(line);

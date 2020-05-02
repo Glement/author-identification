@@ -24,24 +24,33 @@ import java.util.Set;
 @RestController
 public class Controller {
 
-    AuthorService authorService;
+    private AuthorService authorService;
 
     @Autowired
     public Controller(AuthorService authorService) {
         this.authorService = authorService;
     }
 
+    /**
+     *Finds the possible author for a given project.
+     * @param project
+     * @return Returns
+     * @see Response
+     * which contains the last 10 authors with the highest similarity scores.
+     */
     @PostMapping("/find")
     public ResponseEntity<Response> findScore(@Validated @RequestBody ProjectDto project) {
         Response response;
         response = authorService.findPossibleAuthor(project);
-        if(response.getBothTop().size()>0 &&
-                response.getWordTop().size()>0 &&
-                response.getTfTop().size()>0)
-            return ResponseEntity.ok(response);
-        return ResponseEntity.of(Optional.empty());
+        return ResponseEntity.ok(response);
     }
-    @PutMapping("/update-{id}")
+
+    /**
+     * Updates vectors for a given author.
+     * @param authorID
+     * @return If author was found returns status.ok, if not throws an exception.
+     */
+    @PutMapping("/update/{id}")
     public ResponseEntity<String> updateVector(@RequestParam long authorID) {
        if(authorService.updateAuthor(authorID))
            return ResponseEntity.ok("Updated");
@@ -49,12 +58,17 @@ public class Controller {
                 HttpStatus.NOT_FOUND, "Author not found"
         );
     }
+
+    /**
+     * Updates vectors of all authors.
+     * @return Returns time, how long it took to perform update.
+     */
     @GetMapping("/updateall")
     public ResponseEntity<?> updateAll()
     {
         long startTime = System.currentTimeMillis();
         authorService.updateAllAuthors();
-        return ResponseEntity.ok("Done in "+(System.currentTimeMillis()-startTime));
+        return ResponseEntity.ok("Done in "+(System.currentTimeMillis()-startTime)+" ms");
     }
 
 }

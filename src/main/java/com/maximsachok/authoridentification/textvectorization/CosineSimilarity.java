@@ -4,10 +4,21 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Class that implements cosine similarity between two vectors.
+ * When the result of similarity is between -1 and 1.
+ * Where 1 means Vectors are identical and -1 means vectors are opposite to each other.
+ */
 public class CosineSimilarity {
+    /**
+     *
+     * @param first First vector
+     * @param second Second Vector
+     * @return returns the cosine similarity of those vectors, -1 if the differ in size.
+     */
     public double compareTwoVectors(double[] first, double[]second) {
         if(first.length != second.length)
-            return -10;
+            return -1;
         double dotProduct = 0.0d;
         double d1 = 0.0d;
         double d2 = 0.0d;
@@ -25,18 +36,24 @@ public class CosineSimilarity {
         return cosineSimilarity;
     }
 
-    public double compareTwoMaps(final Map<String,Double> leftVector,final  Map<String,Double> rightVector) {
+    /**
+     * Compares two maps by taking the intersection of them.
+     * @param first First map
+     * @param second Second map
+     * @return Returns the cosine similarity between those maps, if maps do not have any common keys, returned value is -1.
+     */
+    public double compareTwoMaps(final Map<String,Double> first,final  Map<String,Double> second) {
 
-        final Set<String> intersection = getIntersection(leftVector, rightVector);
+        final Set<String> intersection = getIntersection(first, second);
         if(intersection.isEmpty())
             return -1.0d;
-        final double dotProduct = dot(leftVector, rightVector, intersection);
+        final double dotProduct = dot(first, second, intersection);
         double d1 = 0.0d;
-        for (final Double value : leftVector.values()) {
+        for (final Double value : first.values()) {
             d1 += Math.pow(value, 2);
         }
         double d2 = 0.0d;
-        for (final Double value : rightVector.values()) {
+        for (final Double value : second.values()) {
             d2 += Math.pow(value, 2);
         }
         double cosineSimilarity;

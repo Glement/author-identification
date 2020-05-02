@@ -6,7 +6,20 @@ import org.deeplearning4j.models.word2vec.Word2Vec;
 
 import java.util.*;
 
+/**
+ * Class that vectorizes
+ * @see Project
+ * and
+ * @see ProjectDto
+ * in to vectors or maps.
+ */
 public class TextVectorization {
+    /**
+     * Vectorizes given project in to double array of a size 300 using word2vec model.
+     * @see WordModel
+     * @param project
+     * @return simple double array of size 300
+     */
     public double[] vectoriseProject(ProjectDto project)
     {
         Collection<String> tokens = FilterText.filter(project.getDescEn()+" "+project.getKeywords()+" "+project.getNameEn());
@@ -31,6 +44,11 @@ public class TextVectorization {
         return result;
     }
 
+    /**
+     * Vectorizes list of projects to double array of size 300
+     * @param projects List of projects to vectorize
+     * @return double array of size 300
+     */
     public  double[] vectoriseProjects(List<Project> projects){
         StringBuilder allProject = new StringBuilder();
         for(Project project : projects)
@@ -52,6 +70,11 @@ public class TextVectorization {
             array[i] = array[i]/number;
     }
 
+    /**
+     * Maps given project to a map with key as word and vaule as number of occurrences in project.
+     * @param project Project to vectorize
+     * @return Map with key as word and value as number of occurrences of given key in project.
+     */
     public Map<String,Double> mapProject(ProjectDto project) {
         Map<String,Double> mappedProject = new HashMap<>();
         Collection<String> tokens = FilterText.filter(project.getDescEn()+" "+project.getKeywords()+" "+project.getNameEn());
@@ -64,6 +87,11 @@ public class TextVectorization {
         return mappedProject;
     }
 
+    /**
+     * Calculates the tf-idf for each word for a given list of projects
+     * @param projects List of  projects
+     * @return Map with key as word and value as its tf-idf for a given list of projects.
+     */
     public Map<String,Double> calculateTfIdfForAuthor(List<Project> projects) {
         Vector<Map<String,Double>> mappedProjects = new Vector<>();
         Map<String,Double> result = new HashMap<>();
@@ -101,6 +129,12 @@ public class TextVectorization {
         return result;
     }
 
+    /**
+     * Calculates projects tf-idf where idf is took from a given List of projects.
+     * @param document Document(Project) for which to calculate tf-idf
+     * @param projects List of projects to calculate idf for a given document
+     * @return Map with key as word and value as its tf-idf for a given document with given list of projects.
+     */
     public Map<String, Double> calculateTfIdfForProject(Map<String,Double> document, List<Project> projects){
         Vector<Map<String,Double>> mappedProjects = new Vector<>();
         Map<String,Double> result = new HashMap<>();

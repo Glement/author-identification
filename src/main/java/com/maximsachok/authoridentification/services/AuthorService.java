@@ -37,6 +37,11 @@ public class AuthorService {
         this.objectMapper = objectMapper;
     }
 
+    /**Updates vectors of given author.
+     * @param author Author for which to calculate new vectors
+     * @param projects Authors list of projects
+     * @return Null if project list is empty. Author if not.
+     */
     private Author update(Author author, List<Project> projects) {
         if(projects.isEmpty())
             return null;
@@ -57,6 +62,11 @@ public class AuthorService {
         }
     }
 
+    /**
+     * Updates vectors for a given authors id
+     * @param id Authors id for which to update vectors
+     * @return
+     */
     public Boolean updateAuthor(long id){
         if(!authorRepository.findById(id).isPresent())
             return false;
@@ -72,7 +82,10 @@ public class AuthorService {
         return true;
     }
 
-    public String updateAllAuthors() {
+    /**
+     * Updates vectors for all authors.
+     */
+    public void updateAllAuthors() {
         long startTime;
         List<Author> authorList = new ArrayList<>();
         for(Author it : authorRepository.findAll()){
@@ -90,9 +103,14 @@ public class AuthorService {
         startTime = System.currentTimeMillis();
         authorRepository.saveAll(authorList);
         logger.info(">> Time took to save authors  => {} ms, number of authors saved =>{}", (System.currentTimeMillis() - startTime), authorList.size());
-        return (">> Time took to save authors  =>"+(System.currentTimeMillis() - startTime)+"ms, size =>"+ authorList.size());
     }
 
+    /**
+     * Looks through all authors and finds possible authors that could have written given project.
+     * @param project Project for which to find possible author
+     * @return Response object that contains 3 lists sorted in descending order based on wordscore, tfscore and  both(with priority given to wordscore).
+     * @see Response
+     */
     public Response findPossibleAuthor(ProjectDto project) {
         ResultList wordVecTop = new ResultList();
         ResultList tfTop = new ResultList();

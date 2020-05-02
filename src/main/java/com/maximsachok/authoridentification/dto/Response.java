@@ -2,10 +2,22 @@ package com.maximsachok.authoridentification.dto;
 
 import java.util.ArrayList;
 
+/**
+ * Response class returned to user.
+ * Contain lists of
+ * @see Result
+ * sorted by
+ * @see Result#getTfScore()
+ * or
+ * @see Result#getWordScore()
+ *or both of them with the priorioty of
+ * @see Result#getWordScore().
+ * Sorted in descending orde. The lower the score, the lower the possibility that this author is the author of given project.
+ */
 public class Response {
-    ArrayList<Result> wordTop = null;
-    ArrayList<Result> tfTop = null;
-    ArrayList<Result> bothTop = null;
+    private ArrayList<Result> wordTop = null;
+    private ArrayList<Result> tfTop = null;
+    private ArrayList<Result> bothTop = null;
 
     public ArrayList<Result> getWordTop() {
         return wordTop;

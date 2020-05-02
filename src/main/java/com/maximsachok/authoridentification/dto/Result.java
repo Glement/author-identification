@@ -2,7 +2,13 @@ package com.maximsachok.authoridentification.dto;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.List;
 
+/**
+ * Class containing author id, and author similarity scores (word2vec score and TF-IDF score).
+ * @see com.maximsachok.authoridentification.textvectorization.TextVectorization#vectoriseProject(ProjectDto) 
+ * @see com.maximsachok.authoridentification.textvectorization.TextVectorization#calculateTfIdfForAuthor(List)
+ */
 public class Result implements Serializable {
     private Double wordScore;
     private Double tfScore;
