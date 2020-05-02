@@ -18,7 +18,6 @@ public class WordModel {
      *
      * @return If resource can not be loaded, returns null. Else returns Word2Vec initialised model.
      * @see Word2Vec
-     * .
      */
     public static Word2Vec getWordModel(){
         if(model == null)

@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 /**
- * Custom list of
- * @see Result
+ * Custom list of Result
  * with maximum size of 10. Sorted by given comparator.
+ * @see Result
  */
 public class ResultList {
     private ArrayList<Result> resultList = new ArrayList<>();

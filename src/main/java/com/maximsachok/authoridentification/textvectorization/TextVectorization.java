@@ -7,11 +7,9 @@ import org.deeplearning4j.models.word2vec.Word2Vec;
 import java.util.*;
 
 /**
- * Class that vectorizes
+ * Class that vectorizes given projects in to vectors or maps.
  * @see Project
- * and
  * @see ProjectDto
- * in to vectors or maps.
  */
 public class TextVectorization {
     /**

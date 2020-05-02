@@ -34,9 +34,9 @@ public class Controller {
     /**
      *Finds the possible author for a given project.
      * @param project Project for which to find an author
-     * @return Returns
+     * @return Returns Response object which contains the last 10 authors with the highest similarity scores.
      * @see Response
-     * which contains the last 10 authors with the highest similarity scores.
+
      */
     @PostMapping("/find")
     public ResponseEntity<Response> findScore(@Validated @RequestBody ProjectDto project) {
