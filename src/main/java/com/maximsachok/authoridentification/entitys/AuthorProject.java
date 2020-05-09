@@ -16,14 +16,6 @@ public class AuthorProject {
     @JoinColumn(name = "project_id_tk_t_project", referencedColumnName = "project_id_tk")
     private Project project;
 
-    @Column(name = "project_id_bk")
-    private String projectIdBk;
-
-    @Column(name = "expert_bk")
-    private String expertBk;
-
-    @Column(name = "role")
-    private String role;
 
 
     public Project getProject() {
@@ -40,29 +32,5 @@ public class AuthorProject {
 
     public void setAuthor(Author author) {
         this.author = author;
-    }
-
-    public String getProjectIdBk() {
-        return projectIdBk;
-    }
-
-    public void setProjectIdBk(String projectIdBk) {
-        this.projectIdBk = projectIdBk;
-    }
-
-    public String getExpertBk() {
-        return expertBk;
-    }
-
-    public void setExpertBk(String expertBk) {
-        this.expertBk = expertBk;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
     }
 }

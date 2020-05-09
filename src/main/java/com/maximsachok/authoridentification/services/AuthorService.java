@@ -68,18 +68,24 @@ public class AuthorService {
      * @return returns true if author exists, false if not.
      */
     public Boolean updateAuthor(long id){
-        if(!authorRepository.findById(id).isPresent())
+        if(authorRepository.findById(id).isEmpty())
             return false;
         Author author = authorRepository.findById(id).get();
         List<Project> projects = new ArrayList<>();
-        for(AuthorProject authorProject : author.getAuthorProjects()){
-            projects.add(authorProject.getProject());
-        }
+        projects = getProjects(author);
         if(projects.isEmpty())
             return true;
         if(update(author,projects)!=null)
             authorRepository.save(author);
         return true;
+    }
+
+    private List<Project> getProjects(Author author){
+        List<Project> projects = new ArrayList<>();
+        for(AuthorProject authorProject : author.getAuthorProjects()){
+            projects.add(authorProject.getProject());
+        }
+        return projects;
     }
 
     /**
@@ -88,16 +94,14 @@ public class AuthorService {
     public void updateAllAuthors() {
         long startTime;
         List<Author> authorList = new ArrayList<>();
-        for(Author it : authorRepository.findAll()){
+        for(Author author : authorRepository.findAll()){
             List<Project> projects = new ArrayList<>();
-            for(AuthorProject authorProject : it.getAuthorProjects()){
-                projects.add(authorProject.getProject());
-            }
+            projects = getProjects(author);
             if(projects.isEmpty())
                 continue;
 
-            if(update(it, projects) != null)
-                authorList.add(it);
+            if(update(author, projects) != null)
+                authorList.add(author);
         }
         logger.info("Start saving");
         startTime = System.currentTimeMillis();
@@ -153,9 +157,7 @@ public class AuthorService {
             Map<String, Double> authorIDF;
             double[] authorWord2Vec;
             List<Project> projects = new ArrayList<>();
-            for(AuthorProject authorProject : author.getAuthorProjects()){
-                projects.add(authorProject.getProject());
-            }
+            projects = getProjects(author);
 
             if(projects.isEmpty())
                 continue;
