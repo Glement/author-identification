@@ -2,3 +2,5 @@
 /.idea/
 /target/
 /src/main/resources/data.sql
+/out/artifacts/author_identification_jar/author-identification.jar
+/out/

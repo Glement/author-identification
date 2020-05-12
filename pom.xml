@@ -13,6 +13,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>author-identification</name>
 	<description>Bc project by Maxim Sachok for CVUT FIT in 2020.</description>
+	<packaging>jar</packaging>
 
 	<properties>
 		<java.version>14</java.version>
@@ -101,6 +102,19 @@
                     <target>13</target>
                 </configuration>
             </plugin>
+			<plugin>
+				<!-- Build an executable JAR -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.2.0</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>com.maximsachok.authoridentification.AuthorIdentificationApplication</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
         </plugins>
 	</build>
 

@@ -13,7 +13,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * is an application that helps to determine an author for a given Project(text)
  * based on texts semantic similarity and word use (TF-IDF).
  * This application is using dl4j <a href="https://deeplearning4j.org">deeplearning4j</a> Word2Vec implementation library for converting words in to vectors of 300 dimensions.
- * Using pre-trained Google news <a href="https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing">model</a>.
+ * Using pre-trained Google news <a href="https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit">model</a>.
+ * Data can be downloaded from <a href="https://drive.google.com/file/d/1Iak9LpvmD5uU4jlDvT4d9dKv1vFaxTAw/view">here</a>, put it in resources folder.
  * @author  Maxim Sachok
  * @version 1.0
  * @since   2020-05-02
@@ -25,12 +26,12 @@ public class AuthorIdentificationApplication {
 
 	public static void main(String[] args) {
 		logger.info("Starting loading up model and stopwords.");
-		if(WordModel.getWordModel()==null) {
-			logger.info("Can't start due to model not being loaded.");
-			return;
-		}
 		if(StopWords.getStopWords().size()==0) {
 			logger.info("Can't start due to stopwords not being loaded.");
+			return;
+		}
+		if(WordModel.getWordModel()==null) {
+			logger.info("Can't start due to model not being loaded.");
 			return;
 		}
 		SpringApplication.run(AuthorIdentificationApplication.class, args);

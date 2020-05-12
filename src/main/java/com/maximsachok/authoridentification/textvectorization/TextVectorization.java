@@ -2,6 +2,7 @@ package com.maximsachok.authoridentification.textvectorization;
 
 import com.maximsachok.authoridentification.entitys.Project;
 import com.maximsachok.authoridentification.dto.ProjectDto;
+import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 
 import java.util.*;
@@ -21,15 +22,18 @@ public class TextVectorization {
     public double[] vectoriseProject(ProjectDto project)
     {
         Collection<String> tokens = FilterText.filter(project.getDescEn()+" "+project.getKeywords()+" "+project.getNameEn());
-        Word2Vec model = WordModel.getWordModel();
+        WordVectors model = WordModel.getWordModel();
         double[] result = new double[300];
         Arrays.fill(result,0d);
         int i = 0;
         for(String word : tokens){
             if (i==0) {
-                result = model.getWordVector(word);
+                if (model.hasWord(word))
+                    result = model.getWordVector(word);
+                else
+                    continue;
             }
-            else if (model.getWordVector(word)!=null){
+            else if (model.hasWord(word)){
                 sumTwoArrays(result,model.getWordVector(word));
             }
             else{
