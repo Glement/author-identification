@@ -13,64 +13,6 @@ import java.util.*;
  * @see ProjectDto
  */
 public class TextVectorization {
-    /**
-     * Vectorizes given project in to double array of a size 300 using word2vec model.
-     * @see WordModel
-     * @param project Project for which to find author.
-     * @return simple double array of size 300
-     */
-    public double[] vectoriseProject(ProjectDto project)
-    {
-        Collection<String> tokens = FilterText.filter(project.getDescEn()+" "+project.getKeywords()+" "+project.getNameEn());
-        WordVectors model = WordModel.getWordModel();
-        double[] result = new double[300];
-        Arrays.fill(result,0d);
-        int i = 0;
-        for(String word : tokens){
-            if (i==0) {
-                if (model.hasWord(word))
-                    result = model.getWordVector(word);
-                else
-                    continue;
-            }
-            else if (model.hasWord(word)){
-                sumTwoArrays(result,model.getWordVector(word));
-            }
-            else{
-                continue;
-            }
-            ++i;
-        }
-        if(i>0)
-            divideArrayByNumber(result,i);
-        return result;
-    }
-
-    /**
-     * Vectorizes list of projects to double array of size 300
-     * @param projects List of projects to vectorize
-     * @return double array of size 300
-     */
-    public  double[] vectoriseProjects(List<Project> projects){
-        StringBuilder allProject = new StringBuilder();
-        for(Project project : projects)
-        {
-            allProject.append(" ").append(project.getDescEn()).append(" ").append(project.getNameEn()).append(" ").append(project.getKeywords());
-        }
-        ProjectDto project = new ProjectDto();
-        project.setDescEn(allProject.toString());
-        return vectoriseProject(project);
-    }
-
-    private void sumTwoArrays(double[] first, double[] second){
-        for(int i = 0; i<first.length;i++)
-            first[i] = first[i]+second[i];
-    }
-
-    private void divideArrayByNumber(double[] array, double number){
-        for(int i = 0; i<array.length;i++)
-            array[i] = array[i]/number;
-    }
 
     /**
      * Maps given project to a map with key as word and vaule as number of occurrences in project.
@@ -79,7 +21,7 @@ public class TextVectorization {
      */
     public Map<String,Double> mapProject(ProjectDto project) {
         Map<String,Double> mappedProject = new HashMap<>();
-        Collection<String> tokens = FilterText.filter(project.getDescEn()+" "+project.getKeywords()+" "+project.getNameEn());
+        Collection<String> tokens = FilterText.filter(project.asString());
         for(String word : tokens){
             if(mappedProject.containsKey(word))
                 mappedProject.put(word,mappedProject.get(word)+1);

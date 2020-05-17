@@ -5,21 +5,20 @@ import java.math.BigInteger;
 import java.util.List;
 
 /**
- * Class containing author id, and author similarity scores (word2vec score and TF-IDF score).
- * @see com.maximsachok.authoridentification.textvectorization.TextVectorization#vectoriseProject(ProjectDto) 
+ * Class containing author id, and author similarity scores (bayes score and TF-IDF score).
  * @see com.maximsachok.authoridentification.textvectorization.TextVectorization#calculateTfIdfForAuthor(List)
  */
 public class Result implements Serializable {
-    private Double wordScore;
     private Double tfScore;
+    private Double bayesScore;
     private long authorID;
 
-    public Double getWordScore() {
-        return wordScore;
+    public Double getBayesScore() {
+        return bayesScore;
     }
 
-    public void setWordScore(Double wordScore) {
-        this.wordScore = wordScore;
+    public void setBayesScore(Double bayesScore) {
+        this.bayesScore = bayesScore;
     }
 
     public Double getTfScore() {
@@ -41,8 +40,8 @@ public class Result implements Serializable {
     @Override
     public String toString() {
         return "Result{" +
-                "wordScore=" + wordScore +
-                ", tfScore=" + tfScore +
+                "tfScore=" + tfScore +
+                ", bayesScore=" + bayesScore +
                 ", authorID=" + authorID +
                 '}';
     }

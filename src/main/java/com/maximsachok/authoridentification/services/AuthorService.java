@@ -12,14 +12,17 @@ import com.maximsachok.authoridentification.entitys.AuthorProject;
 import com.maximsachok.authoridentification.entitys.Project;
 import com.maximsachok.authoridentification.repositorys.AuthorRepository;
 import com.maximsachok.authoridentification.textvectorization.CosineSimilarity;
+import com.maximsachok.authoridentification.textvectorization.TextClassifier;
 import com.maximsachok.authoridentification.textvectorization.TextVectorization;
 import com.maximsachok.authoridentification.utils.ResultList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import weka.classifiers.bayes.NaiveBayesMultinomialText;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +33,7 @@ public class AuthorService {
     private static final Logger logger = LoggerFactory.getLogger(AuthorIdentificationApplication.class);
     private AuthorRepository authorRepository;
     private ObjectMapper objectMapper;
+    private static Boolean updating = false;
 
     @Autowired
     public AuthorService(AuthorRepository authorRepository, ObjectMapper objectMapper) {
@@ -47,12 +51,10 @@ public class AuthorService {
             return null;
         TextVectorization textVectorization = new TextVectorization();
         long startTime = System.currentTimeMillis();
-        double[] textWordVec = textVectorization.vectoriseProjects(projects);
         Map<String, Double> textTfIdf = textVectorization.calculateTfIdfForAuthor(projects);
-        logger.info(">> Time took to compute Word2Vec and Tf  => {} ms", (System.currentTimeMillis() - startTime));
+        logger.info(">> Time took to compute Tf  => {} ms", (System.currentTimeMillis() - startTime));
         try{
             startTime = System.currentTimeMillis();
-            author.setExpertWordVec(objectMapper.writeValueAsString(textWordVec));
             author.setExpertTf(objectMapper.writeValueAsString(textTfIdf));
             logger.info(">> Time took to transform vectors to json  => {} ms", (System.currentTimeMillis() - startTime));
             return author;
@@ -62,19 +64,99 @@ public class AuthorService {
         }
     }
 
+    public double alg(){
+        double numberOfAuthors=0;
+        double numberOfFound=0;
+
+        List<Author> authorList = authorRepository.findAll();
+
+        Map<Author,List<Project>> map = new HashMap<>();
+
+        Map<Author,Project> deleted = new HashMap<>();
+
+        for(Author author : authorList){
+            List<Project> projects = getProjects(author);
+            if(projects.size()>=2){
+                deleted.put(author,projects.get(0));
+                projects.remove(0);
+                map.put(author,projects);
+                numberOfAuthors++;
+            }
+        }
+
+        TextClassifier textClassifier = TextClassifier.updateClassifier(new NaiveBayesMultinomialText());
+        for(Author author : authorList){
+            List<Project> projects;
+            projects = getProjects(author);
+            if(projects.isEmpty())
+                continue;
+            textClassifier.addCategory(author.getExpertidtk().toString());
+        }
+        textClassifier.setupAfterCategorysAdded();
+        for(Author author : authorList){
+            List<Project> projects;
+            if(!map.containsKey(author))
+                continue;
+            for(Project project: map.get(author)){
+                textClassifier.addData(project.asString(),author.getExpertidtk().toString());
+            }
+        }
+        try{
+            textClassifier.buildIfNeeded();
+        }
+        catch (Exception ignored){}
+
+        for(Author author : deleted.keySet()){
+            ResultList bayesScore = new ResultList();
+            for(Author author2 : authorList){
+                if(deleted.containsKey(author)){
+                    Result result = new Result();
+                    double [] classifierResult = null;
+                    try{
+                        classifierResult = textClassifier.classifyMessage(deleted.get(author).asString());
+                    }
+                    catch (Exception ignored){}
+                    if(classifierResult!=null
+                            && textClassifier.getClassIndex(author.getExpertidtk().toString())>-1
+                            && textClassifier.getClassIndex(author.getExpertidtk().toString())<classifierResult.length){
+                        result.setBayesScore(classifierResult[textClassifier.getClassIndex(author.getExpertidtk().toString())]);
+                    }
+                    bayesScore.addItem(result);
+                }
+
+            }
+            if(bayesScore.getResultList().size()>0 && bayesScore.getResultList().get(0).getAuthorID()==author.getExpertidtk()){
+                numberOfFound++;
+            }
+        }
+
+
+        return numberOfFound/numberOfAuthors;
+    }
+
     /**
      * Updates vectors for a given authors id
      * @param id Authors id for which to update vectors
      * @return returns true if author exists, false if not.
      */
-    public Boolean updateAuthor(long id){
+    synchronized public Boolean updateAuthor(long id){
+        updating = true;
         if(authorRepository.findById(id).isEmpty())
             return false;
         Author author = authorRepository.findById(id).get();
-        List<Project> projects = new ArrayList<>();
+        List<Project> projects;
         projects = getProjects(author);
         if(projects.isEmpty())
             return true;
+        TextClassifier classifier =  TextClassifier.getTextClassifier(new NaiveBayesMultinomialText());
+        classifier.addCategoryAfterSetup(author.getExpertidtk().toString());
+        for(Project project : projects){
+            classifier.addData(project.asString(), author.getExpertidtk().toString());
+        }
+        try{
+            classifier.buildIfNeeded();
+        }
+        catch (Exception ignored){}
         if(update(author,projects)!=null)
             authorRepository.save(author);
         return true;
@@ -88,18 +170,46 @@ public class AuthorService {
         return projects;
     }
 
-    /**
-     * Updates vectors for all authors.
-     */
-    public void updateAllAuthors() {
-        long startTime;
-        List<Author> authorList = new ArrayList<>();
-        for(Author author : authorRepository.findAll()){
+    private void updateClassifier(List<Author> authors){
+        TextClassifier textClassifier = TextClassifier.updateClassifier(new NaiveBayesMultinomialText());
+        for(Author author : authors){
             List<Project> projects = new ArrayList<>();
             projects = getProjects(author);
             if(projects.isEmpty())
                 continue;
+            textClassifier.addCategory(author.getExpertidtk().toString());
+        }
+        textClassifier.setupAfterCategorysAdded();
+        for(Author author : authors){
+            List<Project> projects;
+            projects = getProjects(author);
+            if(projects.isEmpty())
+                continue;
+            for(Project project: projects){
+                textClassifier.addData(project.asString(),author.getExpertidtk().toString());
+            }
+        }
+        try{
+            textClassifier.buildIfNeeded();
+        }
+        catch (Exception ignored){}
 
+    }
+
+    /**
+     * Updates vectors for all authors.
+     */
+    synchronized public void updateAllAuthors()  {
+        updating = true;
+        long startTime;
+        List<Author> authorList = new ArrayList<>();
+        List<Author> authors = authorRepository.findAll();
+        updateClassifier(authors);
+        for(Author author : authors){
+            List<Project> projects;
+            projects = getProjects(author);
+            if(projects.isEmpty())
+                continue;
             if(update(author, projects) != null)
                 authorList.add(author);
         }
@@ -116,18 +226,10 @@ public class AuthorService {
      * @see Response
      */
     public Response findPossibleAuthor(ProjectDto project) {
-        ResultList wordVecTop = new ResultList();
         ResultList tfTop = new ResultList();
-        ResultList bothTop = new ResultList();
+        ResultList bayesScore = new ResultList();
         Response response = new Response();
 
-        wordVecTop.setComparator((a, b) -> {
-            if(a.getWordScore()<b.getWordScore())
-                return 1;
-            else if(a.getWordScore()>b.getWordScore())
-                return -1;
-            return 0;
-        });
         tfTop.setComparator((a, b) -> {
             if(a.getTfScore()<b.getTfScore())
                 return 1;
@@ -135,60 +237,71 @@ public class AuthorService {
                 return -1;
             return 0;
         });
-        bothTop.setComparator((a, b) ->{
-            if(a.getWordScore()<b.getWordScore())
+        bayesScore.setComparator((a, b) ->{
+            if(a.getBayesScore()<b.getBayesScore())
                     return 1;
-            else if(a.getWordScore()>b.getWordScore())
+            else if(a.getBayesScore()>b.getBayesScore())
                     return -1;
-            else if(a.getTfScore()<b.getTfScore())
-                return 1;
-            else if(a.getTfScore()>b.getTfScore())
-                return -1;
-
             return 0;
         });
         CosineSimilarity similarity = new CosineSimilarity();
 
         TextVectorization textVectorization = new TextVectorization();
-        double[] projectWord2Vec = textVectorization.vectoriseProject(project);
+        double[] classifierResult = null;
+        TextClassifier textClassifier = null;
+        if(TextClassifier.isInitialized()){
+            textClassifier = TextClassifier.getTextClassifier(new NaiveBayesMultinomialText());
+            try{
+                classifierResult = textClassifier.classifyMessage(project.asString());
+            }
+            catch (Exception ignored){}
+        }
         Map<String, Double> projectTF = textVectorization.mapProject(project);
         for(Author author : authorRepository.findAll())
         {
             Map<String, Double> authorIDF;
-            double[] authorWord2Vec;
             List<Project> projects = new ArrayList<>();
             projects = getProjects(author);
 
             if(projects.isEmpty())
                 continue;
+
             if(author.getExpertTf() == null || author.getExpertWordVec()==null)
                 continue;
             try{
                 authorIDF = objectMapper.readValue(author.getExpertTf(), new TypeReference<Map<String, Double>>(){});
                 logger.info("Map formatted ok");
-                authorWord2Vec = objectMapper.readValue(author.getExpertWordVec(),double[].class);
-                logger.info("Double formatted ok");
             }
             catch (JsonProcessingException ignored){
                 logger.info("Error while doing json to java formatting.");
                 continue;
             }
 
-            if(authorWord2Vec.length==300 && !authorIDF.isEmpty()){
+
+            if(!authorIDF.isEmpty()){
                 Map<String, Double> projectIDF = textVectorization.calculateTfIdfForProject(projectTF,projects);
                 Result result = new Result();
                 result.setAuthorID(author.getExpertidtk());
                 result.setTfScore(similarity.compareTwoMaps(projectIDF,authorIDF));
-                result.setWordScore(similarity.compareTwoVectors(projectWord2Vec,authorWord2Vec));
-                wordVecTop.addItem(result);
+                if(classifierResult!=null && textClassifier.getClassIndex(author.getExpertidtk().toString())>-1 &&
+                   textClassifier.getClassIndex(author.getExpertidtk().toString())<classifierResult.length){
+                    result.setBayesScore(classifierResult[textClassifier.getClassIndex(author.getExpertidtk().toString())]);
+                }
                 tfTop.addItem(result);
-                bothTop.addItem(result);
+                bayesScore.addItem(result);
             }
         }
-        response.setBothTop(bothTop.getResultList());
+        response.setBayesTop(bayesScore.getResultList());
         response.setTfTop(tfTop.getResultList());
-        response.setWordTop(wordVecTop.getResultList());
         return response;
+    }
+
+    public Boolean isUpdating(){
+        return updating;
+    }
+
+    public void setUpdating(Boolean updating){
+        AuthorService.updating=updating;
     }
 
 }

@@ -16,20 +16,72 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigInteger;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 
 @RestController
 public class Controller {
 
     private AuthorService authorService;
-
+    @Autowired
+    private AuthorRepository authorRepository;
     @Autowired
     public Controller(AuthorService authorService) {
         this.authorService = authorService;
     }
+
+    private List<Project> getProjects(Author author){
+        List<Project> projects = new ArrayList<>();
+        for(AuthorProject authorProject : author.getAuthorProjects()){
+            projects.add(authorProject.getProject());
+        }
+        return projects;
+    }
+
+    @GetMapping("/mostpopular")
+    public ResponseEntity<?> findb(){
+        double max = 0.0d;
+        Author result = null;
+        for(Author author : authorRepository.findAll()){
+            List<Project> projects = new ArrayList<>();
+            projects = getProjects(author);
+            if(projects.isEmpty())
+                continue;
+            if(max<projects.size()){
+                max=projects.size();
+                result = author;
+            }
+
+        }
+        assert result != null;
+        return ResponseEntity.ok(result.getExpertidtk());
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<?> finda(){
+        double average = 0.0d;
+        double numberOfAuthors = 0.0d;
+        Author result = null;
+        for(Author author : authorRepository.findAll()){
+            List<Project> projects = new ArrayList<>();
+            projects = getProjects(author);
+            if(projects.isEmpty())
+                continue;
+            numberOfAuthors++;
+            average+=projects.size();
+        }
+        return ResponseEntity.ok(average/numberOfAuthors);
+    }
+
+    @GetMapping("/alg")
+    public ResponseEntity<?> alg(){
+        return ResponseEntity.ok(authorService.alg()*100+"% of success");
+    }
+
+    /*@GetMapping("/test")
+    public ResponseEntity<?> testing(){
+
+    }*/
 
     /**
      *Finds the possible author for a given project.
@@ -39,7 +91,7 @@ public class Controller {
 
      */
     @PostMapping("/find")
-    public ResponseEntity<Response> findScore(@Validated @RequestBody ProjectDto project) {
+    public ResponseEntity<Response> find(@Validated @RequestBody ProjectDto project) {
         Response response;
         response = authorService.findPossibleAuthor(project);
         return ResponseEntity.ok(response);
@@ -52,6 +104,8 @@ public class Controller {
      */
     @PutMapping("/update/{id}")
     public ResponseEntity<String> updateVector(@RequestParam long authorID) {
+        if(authorService.isUpdating())
+            return ResponseEntity.ok("Already updating.");
        if(authorService.updateAuthor(authorID))
            return ResponseEntity.ok("Updated");
         throw new ResponseStatusException(
@@ -64,8 +118,9 @@ public class Controller {
      * @return Returns time, how long it took to perform update.
      */
     @GetMapping("/updateall")
-    public ResponseEntity<?> updateAll()
-    {
+    public ResponseEntity<?> updateAll() {
+        if(authorService.isUpdating())
+            return ResponseEntity.ok("Already updating.");
         long startTime = System.currentTimeMillis();
         authorService.updateAllAuthors();
         return ResponseEntity.ok("Done in "+(System.currentTimeMillis()-startTime)+" ms");

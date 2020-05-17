@@ -10,31 +10,6 @@ import java.util.Set;
  * Where 1 means Vectors are identical and -1 means vectors are opposite to each other.
  */
 public class CosineSimilarity {
-    /**
-     *
-     * @param first First vector
-     * @param second Second Vector
-     * @return returns the cosine similarity of those vectors, -1 if the differ in size.
-     */
-    public double compareTwoVectors(double[] first, double[]second) {
-        if(first.length != second.length)
-            return -1;
-        double dotProduct = 0.0d;
-        double d1 = 0.0d;
-        double d2 = 0.0d;
-        for(int i=0; i<first.length;++i){
-            d1 += Math.pow(first[i],2);
-            d2 += Math.pow(second[i],2);
-            dotProduct += first[i]*second[i];
-        }
-        double cosineSimilarity;
-        if (d1 <= 0.0 || d2 <= 0.0) {
-            cosineSimilarity = 0.0;
-        } else {
-            cosineSimilarity = dotProduct / (Math.sqrt(d1) * Math.sqrt(d2));
-        }
-        return cosineSimilarity;
-    }
 
     /**
      * Compares two maps by taking the intersection of them.

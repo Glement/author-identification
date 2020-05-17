@@ -66,4 +66,8 @@ public class Project {
     public void setKeywords(String keywords) {
         this.keywords = keywords;
     }
+
+    public String asString() {
+        return nameEn+" "+keywords+" "+descEn;
+    }
 }

@@ -1,7 +1,5 @@
 package com.maximsachok.authoridentification;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maximsachok.authoridentification.dto.ProjectDto;
 import com.maximsachok.authoridentification.dto.Response;
@@ -10,8 +8,6 @@ import com.maximsachok.authoridentification.entitys.AuthorProject;
 import com.maximsachok.authoridentification.entitys.Project;
 import com.maximsachok.authoridentification.repositorys.AuthorRepository;
 import com.maximsachok.authoridentification.services.AuthorService;
-import com.maximsachok.authoridentification.textvectorization.StopWords;
-import com.maximsachok.authoridentification.textvectorization.WordModel;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -22,11 +18,6 @@ import java.util.*;
 
 @SpringBootTest
 public class AuthorServiceTest {
-    @BeforeAll
-    static void loadModels(){
-        WordModel.getWordModel();
-        StopWords.getStopWords();
-    }
 
     @Test
     void testUpdateAll() {
@@ -70,11 +61,9 @@ public class AuthorServiceTest {
         ObjectMapper objectMapper = new ObjectMapper();
         AuthorService authorService = new AuthorService(authorRepository, objectMapper);
         authorService.updateAllAuthors();
-        assertThat(author1.getExpertTf() != null && author1.getExpertTf().length() > 1
-                && author1.getExpertWordVec() != null && author1.getExpertWordVec().length() > 1);
-        assertThat(author2.getExpertTf()!=null && author2.getExpertTf().length()>1
-                && author2.getExpertWordVec()!=null && author2.getExpertWordVec().length()>1);
-        assertThat(author3.getExpertTf()==null && author3.getExpertWordVec()==null);
+        assertThat(author1.getExpertTf() != null && author1.getExpertTf().length() > 1);
+        assertThat(author2.getExpertTf()!=null && author2.getExpertTf().length()>1);
+        assertThat(author3.getExpertTf()==null);
     }
 
     @Test
@@ -119,10 +108,9 @@ public class AuthorServiceTest {
         ObjectMapper objectMapper = new ObjectMapper();
         AuthorService authorService = new AuthorService(authorRepository, objectMapper);
         assertThat(authorService.updateAuthor(1L));
-        assertThat(author1.getExpertTf() != null && author1.getExpertTf().length() > 1
-                && author1.getExpertWordVec() != null && author1.getExpertWordVec().length() > 1);
-        assertThat(author2.getExpertTf()==null && author2.getExpertWordVec()==null);
-        assertThat(author3.getExpertTf()==null && author3.getExpertWordVec()==null);
+        assertThat(author1.getExpertTf() != null && author1.getExpertTf().length() > 1);
+        assertThat(author2.getExpertTf()==null);
+        assertThat(author3.getExpertTf()==null);
     }
 
     @Test
@@ -171,10 +159,10 @@ public class AuthorServiceTest {
         projectDto.setDescEn(project1.getDescEn());
         projectDto.setNameEn(project1.getNameEn());
         Response response = authorService.findPossibleAuthor(projectDto);
-        assertThat(response!=null);
-        assertThat(response.getBothTop()!=null
-                && response.getBothTop().size()==2
-                && response.getBothTop().get(0).getAuthorID()==0L
-                && response.getBothTop().get(1).getAuthorID()==1L);
+        assertThat(response!=null
+                && response.getTfTop()!=null
+                && response.getTfTop().size()==2
+                && response.getTfTop().get(0).getAuthorID()==0L
+                && response.getTfTop().get(1).getAuthorID()==1L);
     }
 }
