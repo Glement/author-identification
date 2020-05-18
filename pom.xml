@@ -36,37 +36,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.deeplearning4j</groupId>
-			<artifactId>deeplearning4j-core</artifactId>
-			<version>1.0.0-beta6</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.deeplearning4j</groupId>
-			<artifactId>deeplearning4j-nlp</artifactId>
-			<version>1.0.0-beta6</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.nd4j</groupId>
-			<artifactId>nd4j-native</artifactId>
-			<version>1.0.0-beta6</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.nd4j</groupId>
-			<artifactId>nd4j-native</artifactId>
-			<version>1.0.0-beta6</version>
-			<classifier>windows-x86_64-avx2</classifier>
-		</dependency>
-
-		<dependency>
-			<groupId>org.nd4j</groupId>
-			<artifactId>nd4j-native-platform</artifactId>
-			<version>1.0.0-beta6</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
@@ -86,9 +55,21 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.2.12</version>
+		</dependency>
+
+		<dependency>
 			<groupId>nz.ac.waikato.cms.weka</groupId>
 			<artifactId>weka-stable</artifactId>
 			<version>3.8.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>nz.ac.waikato.cms.weka</groupId>
+			<artifactId>LibLINEAR</artifactId>
+			<version>1.9.7</version>
 		</dependency>
 
 
@@ -106,6 +87,7 @@
                 <configuration>
                     <source>13</source>
                     <target>13</target>
+					<maxmem>12288m</maxmem>
                 </configuration>
             </plugin>
 			<plugin>

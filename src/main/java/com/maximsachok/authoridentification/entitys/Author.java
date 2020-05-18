@@ -19,34 +19,12 @@ public class Author {
     @OneToMany(mappedBy = "author", fetch = FetchType.EAGER)
     private Set<AuthorProject> authorProjects;
 
-    @Column(name = "expert_wordvec", columnDefinition="TEXT")
-    private String expertWordVec;
-
-    @Column(name = "expert_tf", columnDefinition="TEXT")
-    private String expertTf;
-
     public Set<AuthorProject> getAuthorProjects() {
         return authorProjects;
     }
 
     public void setAuthorProjects(Set<AuthorProject> authorProjects) {
         this.authorProjects = authorProjects;
-    }
-
-    public String getExpertWordVec() {
-        return expertWordVec;
-    }
-
-    public void setExpertWordVec(String expertWordVec) {
-        this.expertWordVec = expertWordVec;
-    }
-
-    public String getExpertTf() {
-        return expertTf;
-    }
-
-    public void setExpertTf(String expertTf) {
-        this.expertTf = expertTf;
     }
 
     public Long getExpertidtk() {

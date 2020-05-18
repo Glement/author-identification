@@ -5,9 +5,9 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class AuthorProjectCompositeId implements Serializable {
-    private Author author;
+    private Long author;
 
-    private Project project;
+    private Long project;
 
     @Override
     public boolean equals(Object o) {

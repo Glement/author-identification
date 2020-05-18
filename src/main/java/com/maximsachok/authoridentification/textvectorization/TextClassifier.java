@@ -2,6 +2,20 @@ package com.maximsachok.authoridentification.textvectorization;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
+import weka.classifiers.bayes.BayesNet;
+import weka.classifiers.bayes.NaiveBayesMultinomialText;
+import weka.classifiers.functions.LibLINEAR;
+import weka.classifiers.functions.LinearRegression;
+import weka.classifiers.functions.Logistic;
+import weka.classifiers.lazy.IBk;
+import weka.classifiers.lazy.KStar;
+import weka.classifiers.rules.DecisionTable;
+import weka.classifiers.rules.JRip;
+import weka.classifiers.trees.DecisionStump;
+import weka.classifiers.trees.HoeffdingTree;
+import weka.classifiers.trees.J48;
+import weka.classifiers.trees.LMT;
+import weka.classifiers.trees.lmt.LogisticBase;
 import weka.core.*;
 import weka.core.stemmers.LovinsStemmer;
 import weka.core.stemmers.Stemmer;
@@ -9,40 +23,53 @@ import weka.core.tokenizers.NGramTokenizer;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.StringToWordVector;
 
+import java.io.*;
 import java.util.ArrayList;
 
-public class TextClassifier{
+
+/**
+ * Classifier made for convenient use of WEKA API.
+ * Creates model for given categories(authors) and data per author(projects).
+ */
+public class TextClassifier implements Serializable {
     private ArrayList<Attribute> attributes;
     private ArrayList<String> classValues;
     private Instances trainingData;
     private Boolean upToDate = false;
     private StringToWordVector filter;
     private Classifier classifier;
+    private Boolean initialized = false;
     private static TextClassifier textClassifier = null;
-    private static Boolean initialized = false;
-    public static TextClassifier getTextClassifier(Classifier classifier){
+    private static Boolean cantUpdate = false;
+    public static TextClassifier getTextClassifier(){
         if(textClassifier==null){
-            textClassifier = new TextClassifier(classifier);
-            initialized = true;
+            textClassifier = new TextClassifier();
         }
         return textClassifier;
     }
-    public static TextClassifier updateClassifier(Classifier classifier){
+
+    public static TextClassifier updateClassifier(){
+        if(cantUpdate)
+            return textClassifier;
         textClassifier = null;
-        return getTextClassifier(classifier);
+        return getTextClassifier();
     }
-    private TextClassifier(Classifier classifier){
-        buildClassifier(classifier);
+    private TextClassifier (){
+        buildClassifier();
     }
 
-    public static Boolean isInitialized() {
+    public Boolean isInitialized() {
         return initialized;
     }
 
-    private void buildClassifier(Classifier classifier){
-        this.classifier = classifier;
+    private void buildClassifier(){
+        LibLINEAR liblinear = new LibLINEAR();
+        liblinear.setSVMType(new SelectedTag(0, LibLINEAR.TAGS_SVMTYPE));
+        liblinear.setProbabilityEstimates(true);
+        liblinear.setBias(1); // default value
+        classifier = liblinear;
         filter = new StringToWordVector();
-        filter.setWordsToKeep(1000000);
+        filter.setWordsToKeep(500000);
         filter.setIDFTransform(true);
         filter.setTFTransform(true);
         filter.setLowerCaseTokens(true);
@@ -53,11 +80,12 @@ public class TextClassifier{
         t.setNGramMaxSize(3);
         t.setNGramMinSize(1);
         filter.setTokenizer(t);
-        Stemmer s = new /*Iterated*/LovinsStemmer();
+        Stemmer s = new LovinsStemmer();
         filter.setStemmer(s);
         attributes = new ArrayList<>();
         attributes.add(new Attribute("text",(ArrayList<String>)null));
         classValues = new ArrayList<>();
+        initialized = false;
     }
 
     public void addCategory(String category) {
@@ -65,18 +93,11 @@ public class TextClassifier{
         classValues.add(category);
     }
 
-    public void addCategoryAfterSetup(String category){
-        category = category.toLowerCase();
-        attributes.get(1).addStringValue(category);
-        trainingData = new Instances("AuthorClassification", attributes, 100);
-        trainingData.setClassIndex(trainingData.numAttributes() - 1);
-    }
-
     public void setupAfterCategorysAdded() {
         attributes.add(new Attribute("class", classValues));
         // Create dataset with initial capacity of 100, and set index of class.
         trainingData = new Instances("AuthorClassification", attributes, 100);
-        trainingData.setClassIndex(trainingData.numAttributes() - 1);
+        trainingData.setClassIndex(1);
     }
 
     public void addData(String message, String classValue) throws IllegalStateException {
@@ -114,6 +135,7 @@ public class TextClassifier{
             // Rebuild classifier.
             classifier.buildClassifier(filteredData);
             upToDate = true;
+            initialized = true;
         }
     }
 
@@ -122,14 +144,15 @@ public class TextClassifier{
     }
 
     public double[] classifyMessage(String message) throws Exception {
+        cantUpdate = true;
         buildIfNeeded();
-        Instances testset = trainingData.stringFreeStructure();
-        Instance testInstance = makeInstance(message, testset);
+        Instances testSet = trainingData.stringFreeStructure();
+        Instance testInstance = makeInstance(message, testSet);
 
         // Filter instance.
         filter.input(testInstance);
         Instance filteredInstance = filter.output();
-        Classifier classifier1 = AbstractClassifier.makeCopy(classifier);
-        return classifier1.distributionForInstance(filteredInstance);
+        cantUpdate = false;
+        return classifier.distributionForInstance(filteredInstance);
     }
 }
