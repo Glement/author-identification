@@ -5,12 +5,6 @@ How to use?
 
 This application accepts http request. As default it is running at **localhost:8080**.
 
-Update
-------
-To update the text classifier (calculate new model) just send **GET** request to **localhost:8080/updateall**.
-It would return ok 202 code, and string = **Done in #** where # is the number of milliseconds it took to update.
-With the supplied data and LibLINEAR algorithm and maximum n-gram size of 3 it takes 20 min to build the classifier.
-
 
 Find possible author
 --------------------
@@ -22,3 +16,4 @@ To find possible author of given project (text), send **POST** request to **loca
 | **keywords** - Keywords specific to this project.
 
 As a response you would get **Long** id of author that algorithm thinks has wrote given text.
+Maximum number of connections or requests per connection is limited to 4. You can change it in application properties
