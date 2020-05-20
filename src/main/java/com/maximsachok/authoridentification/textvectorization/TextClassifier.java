@@ -1,23 +1,10 @@
 package com.maximsachok.authoridentification.textvectorization;
 
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
-import weka.classifiers.bayes.BayesNet;
-import weka.classifiers.bayes.NaiveBayesMultinomialText;
 import weka.classifiers.functions.LibLINEAR;
-import weka.classifiers.functions.LinearRegression;
-import weka.classifiers.functions.Logistic;
-import weka.classifiers.lazy.IBk;
-import weka.classifiers.lazy.KStar;
-import weka.classifiers.rules.DecisionTable;
-import weka.classifiers.rules.JRip;
-import weka.classifiers.trees.DecisionStump;
-import weka.classifiers.trees.HoeffdingTree;
-import weka.classifiers.trees.J48;
-import weka.classifiers.trees.LMT;
-import weka.classifiers.trees.lmt.LogisticBase;
 import weka.core.*;
 import weka.core.stemmers.LovinsStemmer;
+import weka.core.stemmers.NullStemmer;
 import weka.core.stemmers.Stemmer;
 import weka.core.tokenizers.NGramTokenizer;
 import weka.filters.Filter;
@@ -39,22 +26,7 @@ public class TextClassifier implements Serializable {
     private StringToWordVector filter;
     private Classifier classifier;
     private Boolean initialized = false;
-    private static TextClassifier textClassifier = null;
-    private static Boolean cantUpdate = false;
-    public static TextClassifier getTextClassifier(){
-        if(textClassifier==null){
-            textClassifier = new TextClassifier();
-        }
-        return textClassifier;
-    }
-
-    public static TextClassifier updateClassifier(){
-        if(cantUpdate)
-            return textClassifier;
-        textClassifier = null;
-        return getTextClassifier();
-    }
-    private TextClassifier (){
+    public TextClassifier (){
         buildClassifier();
     }
 
@@ -80,7 +52,7 @@ public class TextClassifier implements Serializable {
         t.setNGramMaxSize(3);
         t.setNGramMinSize(1);
         filter.setTokenizer(t);
-        Stemmer s = new LovinsStemmer();
+        Stemmer s = new NullStemmer();
         filter.setStemmer(s);
         attributes = new ArrayList<>();
         attributes.add(new Attribute("text",(ArrayList<String>)null));
@@ -94,7 +66,7 @@ public class TextClassifier implements Serializable {
     }
 
     public void setupAfterCategorysAdded() {
-        attributes.add(new Attribute("class", classValues));
+        attributes.add(new Attribute("@@class@@", classValues));
         // Create dataset with initial capacity of 100, and set index of class.
         trainingData = new Instances("AuthorClassification", attributes, 100);
         trainingData.setClassIndex(1);
@@ -144,7 +116,6 @@ public class TextClassifier implements Serializable {
     }
 
     public double[] classifyMessage(String message) throws Exception {
-        cantUpdate = true;
         buildIfNeeded();
         Instances testSet = trainingData.stringFreeStructure();
         Instance testInstance = makeInstance(message, testSet);
@@ -152,7 +123,6 @@ public class TextClassifier implements Serializable {
         // Filter instance.
         filter.input(testInstance);
         Instance filteredInstance = filter.output();
-        cantUpdate = false;
         return classifier.distributionForInstance(filteredInstance);
     }
 }

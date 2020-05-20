@@ -38,22 +38,7 @@ public class Controller {
      */
     @PostMapping("/find")
     public ResponseEntity<?> find(@Validated @RequestBody ProjectDto project) throws Exception {
-        if(authorService.isUpdating())
-            return ResponseEntity.badRequest().body("Can't perform search while updating.");
         return ResponseEntity.ok(authorService.findPossibleAuthor(project));
-    }
-
-    /**
-     * Updates vectors of all authors.
-     * @return Returns time, how long it took to perform update.
-     */
-    @GetMapping("/updateall")
-    public ResponseEntity<?> updateAll() {
-        if(authorService.isUpdating())
-            return ResponseEntity.ok("Already updating.");
-        long startTime = System.currentTimeMillis();
-        authorService.updateAllAuthors();
-        return ResponseEntity.ok("Done in "+(System.currentTimeMillis()-startTime)+" ms");
     }
 
 }
