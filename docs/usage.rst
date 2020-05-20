@@ -17,3 +17,9 @@ To find possible author of given project (text), send **POST** request to **loca
 
 As a response you would get **Long** id of author that algorithm thinks has wrote given text.
 Maximum number of connections or requests per connection is limited to 4. You can change it in application properties
+
+
+Test algorithm
+--------------
+
+To test algorithm on your dataset you can send **GET** request to **localhost:8080/testAlgorithm**.
