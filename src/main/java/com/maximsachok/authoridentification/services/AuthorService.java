@@ -4,19 +4,16 @@ import com.maximsachok.authoridentification.dto.ProjectDto;
 import com.maximsachok.authoridentification.entitys.Author;
 import com.maximsachok.authoridentification.entitys.AuthorProject;
 import com.maximsachok.authoridentification.entitys.Project;
+import com.maximsachok.authoridentification.repositorys.AuthorProjectRepository;
 import com.maximsachok.authoridentification.repositorys.AuthorRepository;
+import com.maximsachok.authoridentification.repositorys.ProjectRepository;
 import com.maximsachok.authoridentification.textcomparation.FindPossibleTextClass;
 import com.maximsachok.authoridentification.textvectorization.TestClassifier;
-import com.maximsachok.authoridentification.textvectorization.TextClassifier;
 import com.maximsachok.authoridentification.utils.DivideList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.ManyToOne;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -26,10 +23,62 @@ import java.util.concurrent.Future;
 public class AuthorService {
 
     private AuthorRepository authorRepository;
-
+    private ProjectRepository projectRepository;
+    private AuthorProjectRepository authorProjectRepository;
     @Autowired
-    public AuthorService(AuthorRepository authorRepository) {
+    public AuthorService(AuthorRepository authorRepository, ProjectRepository projectRepository, AuthorProjectRepository authorProjectRepository) {
         this.authorRepository = authorRepository;
+        this.projectRepository = projectRepository;
+        this.authorProjectRepository = authorProjectRepository;
+    }
+
+    public List<Author> getAuthors(){
+        return authorRepository.findAll();
+    }
+
+    public Optional<Author> getAuthor(Long id){
+        return authorRepository.findById(id);
+    }
+
+    public boolean deleteAuthor(Long id){
+        if(authorRepository.findById(id).isPresent()){
+            authorRepository.delete(authorRepository.findById(id).get());
+            return true;
+        }
+        return false;
+    }
+
+    public Long createAuthor(Author author){
+        return authorRepository.save(author).getExpertidtk();
+    }
+
+
+    public List<ProjectDto> addProject(Author author, Project project){
+        AuthorProject authorProject = new AuthorProject();
+        authorProject.setProject(project);
+        authorProject.setAuthor(author);
+        authorProject = authorProjectRepository.save(authorProject);
+        author.getAuthorProjects().add(authorProject);
+        authorRepository.save(author);
+        project.getAuthorProjects().add(authorProject);
+        projectRepository.save(project);
+        return getAuthorProjectsDto(author.getExpertidtk());
+    }
+
+    public List<ProjectDto> getAuthorProjectsDto(Long id){
+        if(authorRepository.findById(id).isEmpty()){
+            return null;
+        }
+        List<ProjectDto> projects = new ArrayList<>();
+        for(AuthorProject authorProject : authorRepository.findById(id).get().getAuthorProjects()){
+            ProjectDto projectDto = new ProjectDto();
+            projectDto.setDescEn(authorProject.getProject().getDescEn());
+            projectDto.setKeywords(authorProject.getProject().getKeywords());
+            projectDto.setNameEn(authorProject.getProject().getNameEn());
+            projectDto.setId(authorProject.getProject().getProjectIdTk());
+            projects.add(projectDto);
+        }
+        return projects;
     }
 
     /**

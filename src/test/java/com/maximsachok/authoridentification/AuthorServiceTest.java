@@ -5,12 +5,17 @@ import com.maximsachok.authoridentification.dto.ProjectDto;
 import com.maximsachok.authoridentification.entitys.Author;
 import com.maximsachok.authoridentification.entitys.AuthorProject;
 import com.maximsachok.authoridentification.entitys.Project;
+import com.maximsachok.authoridentification.repositorys.AuthorProjectRepository;
 import com.maximsachok.authoridentification.repositorys.AuthorRepository;
+import com.maximsachok.authoridentification.repositorys.ProjectRepository;
 import com.maximsachok.authoridentification.services.AuthorService;
+import com.maximsachok.authoridentification.services.ProjectService;
 import com.maximsachok.authoridentification.textvectorization.TextClassifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import weka.classifiers.bayes.NaiveBayesMultinomialText;
 
@@ -61,7 +66,10 @@ public class AuthorServiceTest {
         authorList.add(author3);
         Mockito.when(authorRepository.findAll()).thenReturn(authorList);
 
-        AuthorService authorService = new AuthorService(authorRepository);
+        ProjectRepository projectRepository = Mockito.mock(ProjectRepository.class);
+        AuthorProjectRepository authorProjectRepository = Mockito.mock(AuthorProjectRepository.class);
+        ProjectService projectService = Mockito.mock(ProjectService.class);
+        AuthorService authorService = new AuthorService(authorRepository, projectRepository, authorProjectRepository);
         ProjectDto projectDto = new ProjectDto();
         projectDto.setKeywords(project1.getKeywords());
         projectDto.setDescEn(project1.getDescEn());
@@ -74,8 +82,5 @@ public class AuthorServiceTest {
             fail("Exception is thrown: " + ex.toString());
         }
         assertThat(response!=null);
-        TextClassifier textClassifier = new TextClassifier();
-        assertThat(textClassifier.isInitialized());
-
     }
 }

@@ -8,5 +8,5 @@ import java.math.BigInteger;
 import java.util.Collection;
 
 @Repository
-public interface ProjectRepository extends JpaRepository<Project, BigInteger> {
+public interface ProjectRepository extends JpaRepository<Project, Long> {
 }

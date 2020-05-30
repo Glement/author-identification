@@ -4,12 +4,23 @@ package com.maximsachok.authoridentification.dto;
 import javax.validation.constraints.NotBlank;
 
 public class ProjectDto{
+   private Long id;
    @NotBlank
    private String nameEn;
    @NotBlank
    private String descEn;
    @NotBlank
    private String keywords;
+
+
+
+   public Long getId() {
+      return id;
+   }
+
+   public void setId(Long id) {
+      this.id = id;
+   }
 
    public String getNameEn() {
       return nameEn;

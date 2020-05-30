@@ -1,5 +1,6 @@
 package com.maximsachok.authoridentification.entitys;
 
+
 import javax.persistence.*;
 
 @Entity

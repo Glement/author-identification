@@ -1,12 +1,6 @@
 package com.maximsachok.authoridentification.entitys;
 
-
-
-
 import javax.persistence.*;
-import javax.validation.constraints.Size;
-import java.math.BigInteger;
-import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -14,9 +8,10 @@ import java.util.Set;
 public class Author {
     @Id
     @Column(name = "expert_id_tk")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long  expertidtk;
 
-    @OneToMany(mappedBy = "author", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "author", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private Set<AuthorProject> authorProjects;
 
     public Set<AuthorProject> getAuthorProjects() {
