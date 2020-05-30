@@ -48,6 +48,15 @@ public class AuthorService {
         return false;
     }
 
+
+    public List<ProjectDto> removeProject(Author author, Project project){
+        for(AuthorProject authorProject : author.getAuthorProjects()){
+            if(authorProject.getProject().getProjectIdTk().equals(project.getProjectIdTk()))
+                authorProjectRepository.delete(authorProject);
+        }
+        return getAuthorProjectsDto(author.getExpertidtk());
+    }
+
     public Long createAuthor(Author author){
         return authorRepository.save(author).getExpertidtk();
     }

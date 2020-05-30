@@ -49,4 +49,14 @@ public class ProjectDto{
    public String asString() {
       return nameEn+" "+keywords+" "+descEn;
    }
+
+   @Override
+   public String toString() {
+      return "ProjectDto{" +
+              "id=" + id +
+              ", nameEn='" + nameEn + '\'' +
+              ", descEn='" + descEn + '\'' +
+              ", keywords='" + keywords + '\'' +
+              '}';
+   }
 }

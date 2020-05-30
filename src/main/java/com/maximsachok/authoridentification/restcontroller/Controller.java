@@ -127,6 +127,14 @@ public class Controller {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @DeleteMapping("/author/{aid}/project/{pid}")
+    public ResponseEntity<?> deleteProjectFromAuthor(@PathVariable Long aid, @PathVariable Long pid){
+        if(authorService.getAuthor(aid).isPresent() && projectService.getProject(pid).isPresent()){
+            return new ResponseEntity<>(authorService.removeProject(authorService.getAuthor(aid).get(),projectService.getProject(pid).get()), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
     @GetMapping("/author/{id}/projects")
     public ResponseEntity<?> getAuthorProjects(@PathVariable Long id){
         List<ProjectDto> projects;
