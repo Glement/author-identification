@@ -71,6 +71,8 @@ public class TestClassifier {
                 map.put(author,projects);
                 numberOfAuthors++;
                 authors.add(author);
+                if(map.size()>60)
+                    break;
             }
         }
         for(Author author : deleted.keySet()){
@@ -78,15 +80,12 @@ public class TestClassifier {
             List<Author> allAuthors = new ArrayList<>(authors);
             List<Author> secondaryCheckAuthors = new ArrayList<>();
             List<Author> foundAuthors;
-            boolean notFound;
             while(!allAuthors.isEmpty()){
-                notFound = false;
                 for(List<List<Author>> listOfAuthorLists : DivideList.batchList(DivideList.batchList(allAuthors,2),12)){
                     foundAuthors = findAuthors(listOfAuthorLists,deleted.get(author).asString(), map);
                     if(foundAuthors!=null)
                         secondaryCheckAuthors.addAll(foundAuthors);
                 }
-
                 if(secondaryCheckAuthors.size()==1){
                     System.out.println("Found authorID="+secondaryCheckAuthors.get(0).getExpertidtk()+" but should be authorID="+author.getExpertidtk());
                     authorID = secondaryCheckAuthors.get(0).getExpertidtk();
@@ -106,36 +105,6 @@ public class TestClassifier {
 
         return numberOfFound/numberOfAuthors;
     }
-
-    private  TextClassifier testBuildClassifier(List<Author> authors, Map<Author, List<Project>> map){
-        TextClassifier textClassifier = new TextClassifier();
-        for(Author author : authors){
-            List<Project> projects;
-            projects = map.get(author);
-            if(projects.isEmpty())
-                continue;
-            textClassifier.addCategory(author.getExpertidtk().toString());
-        }
-        textClassifier.setupAfterCategorysAdded();
-        for(Author author : authors){
-            List<Project> projects;
-            projects = map.get(author);
-            if(projects.isEmpty())
-                continue;
-            for(Project project: projects){
-                textClassifier.addData(project.asString(),author.getExpertidtk().toString());
-            }
-        }
-        try{
-            textClassifier.buildIfNeeded();
-        }
-        catch (Exception ex){
-            ex.printStackTrace();
-            return null;
-        }
-        return textClassifier;
-    }
-
     private static class FindPossibleTextClassForTesting extends FindPossibleTextClass{
         private Map<Author, List<Project>> map;
         public FindPossibleTextClassForTesting(List<Author> authorList, String project, Map<Author, List<Project>> map) {

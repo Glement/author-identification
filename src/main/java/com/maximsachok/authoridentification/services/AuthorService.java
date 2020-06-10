@@ -1,5 +1,6 @@
 package com.maximsachok.authoridentification.services;
 
+import com.maximsachok.authoridentification.dto.AuthorDto;
 import com.maximsachok.authoridentification.dto.ProjectDto;
 import com.maximsachok.authoridentification.entitys.Author;
 import com.maximsachok.authoridentification.entitys.AuthorProject;
@@ -10,7 +11,9 @@ import com.maximsachok.authoridentification.repositorys.ProjectRepository;
 import com.maximsachok.authoridentification.textcomparation.FindPossibleTextClass;
 import com.maximsachok.authoridentification.textvectorization.TestClassifier;
 import com.maximsachok.authoridentification.utils.DivideList;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -50,15 +53,20 @@ public class AuthorService {
 
 
     public List<ProjectDto> removeProject(Author author, Project project){
+        List<ProjectDto> projects = new ArrayList<>();
         for(AuthorProject authorProject : author.getAuthorProjects()){
-            if(authorProject.getProject().getProjectIdTk().equals(project.getProjectIdTk()))
+            if(authorProject.getProject().getProjectIdTk().equals(project.getProjectIdTk())){
                 authorProjectRepository.delete(authorProject);
+            }
+            else
+                projects.add(projectToProjectDto(authorProject.getProject()));
         }
-        return getAuthorProjectsDto(author.getExpertidtk());
+        return projects;
     }
 
-    public Long createAuthor(Author author){
-        return authorRepository.save(author).getExpertidtk();
+    public Long createAuthor(AuthorDto author){
+        Author author1 = new Author();
+        return authorRepository.save(author1).getExpertidtk();
     }
 
 
@@ -74,18 +82,22 @@ public class AuthorService {
         return getAuthorProjectsDto(author.getExpertidtk());
     }
 
+    private ProjectDto projectToProjectDto(Project project){
+        ProjectDto projectDto = new ProjectDto();
+        projectDto.setDescEn(project.getDescEn());
+        projectDto.setKeywords(project.getKeywords());
+        projectDto.setNameEn(project.getNameEn());
+        projectDto.setId(project.getProjectIdTk());
+        return  projectDto;
+    }
+
     public List<ProjectDto> getAuthorProjectsDto(Long id){
         if(authorRepository.findById(id).isEmpty()){
             return null;
         }
         List<ProjectDto> projects = new ArrayList<>();
         for(AuthorProject authorProject : authorRepository.findById(id).get().getAuthorProjects()){
-            ProjectDto projectDto = new ProjectDto();
-            projectDto.setDescEn(authorProject.getProject().getDescEn());
-            projectDto.setKeywords(authorProject.getProject().getKeywords());
-            projectDto.setNameEn(authorProject.getProject().getNameEn());
-            projectDto.setId(authorProject.getProject().getProjectIdTk());
-            projects.add(projectDto);
+            projects.add(projectToProjectDto(authorProject.getProject()));
         }
         return projects;
     }

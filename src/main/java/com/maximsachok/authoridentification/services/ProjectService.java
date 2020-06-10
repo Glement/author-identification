@@ -58,8 +58,12 @@ public class ProjectService {
         return false;
     }
 
-    public Long createProject(Project project){
-        return projectRepository.save(project).getProjectIdTk();
+    public Long createProject(ProjectDto project){
+        Project project1 = new Project();
+        project1.setNameEn(project.getNameEn());
+        project1.setKeywords(project.getKeywords());
+        project1.setDescEn(project.getDescEn());
+        return projectRepository.save(project1).getProjectIdTk();
     }
 
     public Long updateProject(Project project){

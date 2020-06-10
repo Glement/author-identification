@@ -31,11 +31,6 @@ public class Controller {
         this.projectService = projectService;
     }
 
-    @GetMapping("/testAlgorithm")
-    public ResponseEntity<?> testAlgorithm(){
-        return ResponseEntity.ok(authorService.testAlgorithm()*100+"% of success");
-    }
-
     @GetMapping("/author")
     public ResponseEntity<?> getAuthors(){
         List<AuthorDto> authorDtoList = new ArrayList<>();
@@ -97,12 +92,12 @@ public class Controller {
     }
 
     @PostMapping("/project")
-    public ResponseEntity<?> createProject(@Validated @RequestBody Project project){
+    public ResponseEntity<?> createProject(@Validated @RequestBody ProjectDto project){
         return new ResponseEntity<>(projectService.createProject(project), HttpStatus.OK);
     }
 
     @PostMapping("/author")
-    public ResponseEntity<?> createAuthor(@Validated @RequestBody Author author){
+    public ResponseEntity<?> createAuthor(@Validated @RequestBody AuthorDto author){
         return new ResponseEntity<>(authorService.createAuthor(author), HttpStatus.OK);
     }
 
@@ -164,6 +159,11 @@ public class Controller {
     @PostMapping("/find")
     public ResponseEntity<?> find(@Validated @RequestBody ProjectDto project) throws Exception {
         return ResponseEntity.ok(authorService.findPossibleAuthor(project));
+    }
+
+    @GetMapping("/test-algorithm")
+    public ResponseEntity<?> testAlgorithm(){
+        return ResponseEntity.ok(authorService.testAlgorithm()*100+"% of success");
     }
 
 }
