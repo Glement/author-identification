@@ -26,7 +26,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-public class ControllerTest {
+public class ControllerIntegrationTest {
     protected MockMvc mvc;
     @Autowired
     WebApplicationContext webApplicationContext;

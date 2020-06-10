@@ -76,7 +76,7 @@ public class Controller {
     }
 
     @DeleteMapping("/author/{id}")
-    public ResponseEntity<?> deleteAtuhor(@PathVariable Long id){
+    public ResponseEntity<?> deleteAuthor(@PathVariable Long id){
         if(authorService.deleteAuthor(id)){
             return new ResponseEntity<>(HttpStatus.OK);
         }
