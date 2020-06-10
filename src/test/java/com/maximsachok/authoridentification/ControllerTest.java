@@ -168,7 +168,7 @@ public class ControllerTest {
     @Test
     public void deleteAuthor() throws Exception {
         setUp();
-        String uri = "/author/60";
+        String uri = "/author/150";
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.delete(uri)
                 .accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
 
@@ -193,7 +193,6 @@ public class ControllerTest {
         String uri = "/author/60/project/7273";
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri)
                 .accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
-
         int status = mvcResult.getResponse().getStatus();
         assertEquals(200, status);
         String content = mvcResult.getResponse().getContentAsString();

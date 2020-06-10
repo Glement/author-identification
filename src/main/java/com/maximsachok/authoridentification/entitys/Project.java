@@ -5,7 +5,7 @@ import javax.persistence.*;
 import java.util.Set;
 
 @Entity
-@Table(name="t_project",schema = "semantic")
+@Table(name="t_project")
 public class Project {
     @Id
     @Column(name="project_id_tk")

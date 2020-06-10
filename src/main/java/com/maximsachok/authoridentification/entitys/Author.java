@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.util.Set;
 
 @Entity
-@Table(name = "t_expert", schema = "semantic")
+@Table(name = "t_expert")
 public class Author {
     @Id
     @Column(name = "expert_id_tk")

@@ -4,7 +4,7 @@ package com.maximsachok.authoridentification.entitys;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "t_expert_t_project_rel", schema = "semantic")
+@Table(name = "t_expert_t_project_rel")
 @IdClass(AuthorProjectCompositeId.class)
 public class AuthorProject {
     @Id
