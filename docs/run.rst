@@ -20,3 +20,16 @@ If you want to use your own database, fill the neccesary fields in application-p
 	mvn clean package -P production
 	
 Generates jar with the database specified in application-production.properties
+
+If you want to run it use this command for default databsse
+
+.. code-block:: none
+
+	mvn spring-boot:run
+
+Or this command for your specified database
+
+
+.. code-block:: none
+
+	mvn spring-boot:run package -P production
