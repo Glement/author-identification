@@ -1,26 +1,22 @@
 package com.maximsachok.authoridentification.restcontroller;
 
+
 import com.maximsachok.authoridentification.dto.AuthorDto;
 import com.maximsachok.authoridentification.entitys.Author;
-import com.maximsachok.authoridentification.entitys.AuthorProject;
 import com.maximsachok.authoridentification.entitys.Project;
 import com.maximsachok.authoridentification.dto.ProjectDto;
-import com.maximsachok.authoridentification.repositorys.AuthorRepository;
 import com.maximsachok.authoridentification.services.AuthorService;
 import com.maximsachok.authoridentification.services.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
-import java.util.concurrent.locks.ReentrantLock;
-
 
 @RestController
+@RequestMapping("/author-identification")
 public class Controller {
 
     private AuthorService authorService;
@@ -65,11 +61,13 @@ public class Controller {
 
     @GetMapping("/project/{id}")
     public ResponseEntity<?> getProject(@PathVariable Long id){
-       if(projectService.getProject(id).isEmpty()){
+        Optional<Project> project = projectService.getProject(id);
+       if(project.isPresent()){
            ProjectDto projectDto = new ProjectDto();
-           projectDto.setNameEn(projectService.getProject(id).get().getNameEn());
-           projectDto.setKeywords(projectService.getProject(id).get().getKeywords());
-           projectDto.setDescEn(projectService.getProject(id).get().getDescEn());
+           projectDto.setNameEn(project.get().getNameEn());
+           projectDto.setKeywords(project.get().getKeywords());
+           projectDto.setDescEn(project.get().getDescEn());
+           projectDto.setId(id);
             return new ResponseEntity<>(projectDto, HttpStatus.OK);
        }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -93,12 +91,12 @@ public class Controller {
 
     @PostMapping("/project")
     public ResponseEntity<?> createProject(@Validated @RequestBody ProjectDto project){
-        return new ResponseEntity<>(projectService.createProject(project), HttpStatus.OK);
+        return new ResponseEntity<>(projectService.createProject(project), HttpStatus.CREATED);
     }
 
     @PostMapping("/author")
     public ResponseEntity<?> createAuthor(@Validated @RequestBody AuthorDto author){
-        return new ResponseEntity<>(authorService.createAuthor(author), HttpStatus.OK);
+        return new ResponseEntity<>(authorService.createAuthor(author), HttpStatus.CREATED);
     }
 
     @PutMapping("/project/{id}")
@@ -108,8 +106,9 @@ public class Controller {
             project.setDescEn(projectDto.getDescEn());
             project.setKeywords(projectDto.getKeywords());
             project.setNameEn(projectDto.getNameEn());
+            projectDto.setId(id);
             projectService.updateProject(project);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(projectDto, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }

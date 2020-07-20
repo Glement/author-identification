@@ -22,4 +22,20 @@ public class AuthorProjectCompositeId implements Serializable {
     public int hashCode() {
         return Objects.hash(author, project);
     }
+
+    public Long getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(Long author) {
+        this.author = author;
+    }
+
+    public Long getProject() {
+        return project;
+    }
+
+    public void setProject(Long project) {
+        this.project = project;
+    }
 }

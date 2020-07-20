@@ -83,8 +83,9 @@
 <li class="toctree-l1"><a class="reference internal" href="whatthisis.html">What Author Identification is?</a></li>
 <li class="toctree-l1"><a class="reference internal" href="run.html">How to run?</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">How to use?</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#update">Update</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#find-possible-author">Find possible author</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-algorithm">Test algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#crud-operations">CRUD Operations</a></li>
 </ul>
 </li>
 </ul>
@@ -154,12 +155,6 @@
   <div class="section" id="how-to-use">
 <h1>How to use?<a class="headerlink" href="#how-to-use" title="Permalink to this headline">¶</a></h1>
 <p>This application accepts http request. As default it is running at <strong>localhost:8080</strong>.</p>
-<div class="section" id="update">
-<h2>Update<a class="headerlink" href="#update" title="Permalink to this headline">¶</a></h2>
-<p>To update the text classifier (calculate new model) just send <strong>GET</strong> request to <strong>localhost:8080/updateall</strong>.
-It would return ok 202 code, and string = <strong>Done in #</strong> where # is the number of milliseconds it took to update.
-With the supplied data and LibLINEAR algorithm and maximum n-gram size of 3 it takes 20 min to build the classifier.</p>
-</div>
 <div class="section" id="find-possible-author">
 <h2>Find possible author<a class="headerlink" href="#find-possible-author" title="Permalink to this headline">¶</a></h2>
 <p>To find possible author of given project (text), send <strong>POST</strong> request to <strong>localhost:8080/find</strong>, where body should consist of json object with this parameters:</p>
@@ -168,7 +163,26 @@ With the supplied data and LibLINEAR algorithm and maximum n-gram size of 3 it t
 <div class="line"><strong>descEn</strong> - Description of the project in english.</div>
 <div class="line"><strong>keywords</strong> - Keywords specific to this project.</div>
 </div>
-<p>As a response you would get <strong>Long</strong> id of author that algorithm thinks has wrote given text.</p>
+<p>As a response you would get <strong>Long</strong> id of author that algorithm thinks has wrote given text.
+Maximum number of connections or requests per connection is limited to 4. You can change it in application properties</p>
+</div>
+<div class="section" id="test-algorithm">
+<h2>Test algorithm<a class="headerlink" href="#test-algorithm" title="Permalink to this headline">¶</a></h2>
+<p>To test algorithm on your dataset you can send <strong>GET</strong> request to <strong>localhost:8080/testAlgorithm</strong>.</p>
+</div>
+<div class="section" id="crud-operations">
+<h2>CRUD Operations<a class="headerlink" href="#crud-operations" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line"><strong>GET</strong> to <strong>localhost:8080/author</strong> to get authors</div>
+<div class="line"><strong>GET</strong> to <strong>localhost:8080/project</strong> to get projects</div>
+<div class="line"><strong>GET</strong> to <strong>localhost:8080/project/#/authors</strong> to get project authors where # equals id of desired project</div>
+<div class="line"><strong>GET</strong> to <strong>localhost:8080/authors/#/projects</strong> to get author projects where # equals id of desired author</div>
+<div class="line"><strong>DELETE</strong> to <strong>localhost:8080/author/#</strong> to delete author where # equals id of desired author</div>
+<div class="line"><strong>DELETE</strong> to <strong>localhost:8080/project/#</strong> to delete project where # equals id of desired project</div>
+<div class="line"><strong>PUT</strong> to <strong>localhost:8080/project/#</strong> to update project where # equals id of desired project, request body as json must be as follows: <strong>nameEn</strong> - Name of the project in english. <strong>descEn</strong> - Description of the project in english. <strong>keywords</strong> - Keywords specific to this project.</div>
+<div class="line"><strong>PUT</strong> to <strong>localhost:8080/author/#/project/$</strong> to add project $ to author #</div>
+<div class="line"><strong>DELETE</strong> to <strong>localhost:8080/author/#/project/$</strong> to remove project $ from author #</div>
+</div>
 </div>
 </div>
 

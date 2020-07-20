@@ -50,7 +50,7 @@ public class TextClassifier implements Serializable {
         filter.setNormalizeDocLength(new SelectedTag(StringToWordVector.FILTER_NORMALIZE_ALL,StringToWordVector.TAGS_FILTER));
         NGramTokenizer t = new NGramTokenizer();
         t.setNGramMaxSize(3);
-        t.setNGramMinSize(1);
+        t.setNGramMinSize(2);
         filter.setTokenizer(t);
         Stemmer s = new NullStemmer();
         filter.setStemmer(s);

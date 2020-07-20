@@ -151,12 +151,22 @@
   <div class="section" id="how-to-run">
 <h1>How to run?<a class="headerlink" href="#how-to-run" title="Permalink to this headline">¶</a></h1>
 <p>If you want to run it you can use either IDEA of your choise, or maven.
-Run this comman from root directory of this project</p>
+Run this comman from root directory of this project if you want to use this project with supplied database ( recommended only for testing)</p>
+<p>Generates jar with default database</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mvn clean install
+</pre></div>
+</div>
+<p>If you want to use your own database, fill the neccesary fields in application-production.properties in <strong>author-identification/src/main/resources/application-production.properties</strong> and run with this command</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mvn clean package -P production
+</pre></div>
+</div>
+<p>Generates jar with the database specified in application-production.properties</p>
+<p>If you want to run it use this command for default databsse</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mvn spring-boot:run
 </pre></div>
 </div>
-<p>To generate Jar just run</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mvn clean install
+<p>Or this command for your specified database</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mvn spring-boot:run package -P production
 </pre></div>
 </div>
 </div>

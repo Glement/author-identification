@@ -4,6 +4,7 @@ import com.maximsachok.authoridentification.dto.AuthorDto;
 import com.maximsachok.authoridentification.dto.ProjectDto;
 import com.maximsachok.authoridentification.entitys.Author;
 import com.maximsachok.authoridentification.entitys.AuthorProject;
+import com.maximsachok.authoridentification.entitys.AuthorProjectCompositeId;
 import com.maximsachok.authoridentification.entitys.Project;
 import com.maximsachok.authoridentification.repositorys.AuthorProjectRepository;
 import com.maximsachok.authoridentification.repositorys.AuthorRepository;
@@ -74,11 +75,17 @@ public class AuthorService {
         AuthorProject authorProject = new AuthorProject();
         authorProject.setProject(project);
         authorProject.setAuthor(author);
-        authorProject = authorProjectRepository.save(authorProject);
-        author.getAuthorProjects().add(authorProject);
-        authorRepository.save(author);
-        project.getAuthorProjects().add(authorProject);
-        projectRepository.save(project);
+        AuthorProjectCompositeId authorProjectCompositeId = new AuthorProjectCompositeId();
+        authorProjectCompositeId.setAuthor(author.getExpertidtk());
+        authorProjectCompositeId.setProject(project.getProjectIdTk());
+        if(authorProjectRepository.findById(authorProjectCompositeId).isEmpty())
+        {
+            authorProject = authorProjectRepository.save(authorProject);
+            author.getAuthorProjects().add(authorProject);
+            authorRepository.save(author);
+            project.getAuthorProjects().add(authorProject);
+            projectRepository.save(project);
+        }
         return getAuthorProjectsDto(author.getExpertidtk());
     }
 
