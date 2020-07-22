@@ -1,6 +1,7 @@
 package com.maximsachok.authoridentification.restcontroller;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maximsachok.authoridentification.dto.AuthorDto;
 import com.maximsachok.authoridentification.dto.SearchResultDto;
 import com.maximsachok.authoridentification.entitys.Author;
@@ -10,10 +11,13 @@ import com.maximsachok.authoridentification.services.AuthorService;
 import com.maximsachok.authoridentification.services.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.*;
 
 @RestController
@@ -130,11 +134,19 @@ public class Controller {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @DeleteMapping("/project/{pid}/author/{aid}")
+    public ResponseEntity<?> deleteAuthorFromProject(@PathVariable Long aid, @PathVariable Long pid){
+        if(authorService.getAuthor(aid).isPresent() && projectService.getProject(pid).isPresent()){
+            return new ResponseEntity<>(projectService.removeAuthor(authorService.getAuthor(aid).get(),projectService.getProject(pid).get()), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
     @GetMapping("/author/{id}/projects")
     public ResponseEntity<?> getAuthorProjects(@PathVariable Long id){
-        List<ProjectDto> projects;
+        Optional<List<ProjectDto>> projects;
         projects = authorService.getAuthorProjectsDto(id);
-        if(projects!=null){
+        if(projects.isPresent()){
             return new ResponseEntity<>(projects, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -150,22 +162,34 @@ public class Controller {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    /**
-     *Finds the possible author for a given project.
-     * @param project Project for which to find an author
-     * @return Returns List of pairs of AuthorDtio and Double of 10 most possible author. If called during update returns "accepted request" with empty list
-     */
-    @PostMapping("/find")
-    public ResponseEntity<?> find(@Validated @RequestBody ProjectDto project) throws Exception {
+    /*@PostMapping("/find")
+    public ResponseEntity<?> find(@Validated @RequestBody ProjectDto project){
         List<SearchResultDto> result = authorService.findPossibleAuthor(project);
         if(result.size()>0)
             return ResponseEntity.ok(result);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
-    }
+    }*/
 
     @GetMapping("/test-algorithm")
     public ResponseEntity<?> testAlgorithm(){
-        return ResponseEntity.ok(authorService.testAlgorithm()*100+"% of success");
+        return ResponseEntity.ok(authorService.testAlgorithm());
+    }
+
+
+    @PostMapping("/find")
+    public ResponseEntity<?> find(@Validated @RequestBody ProjectDto project){
+        if(!authorService.classifierIsInitialized()){
+            Thread initClassifier = new Thread(() -> authorService.findPossibleAuthor(project));
+            initClassifier.start();
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.ACCEPTED);
+        }
+        return ResponseEntity.ok(authorService.findPossibleAuthor(project));
+    }
+    @GetMapping("/refresh-classifier")
+    public ResponseEntity<?> refresh(){
+        Thread refreshClassifier = new Thread(() -> authorService.refreshClassifier());
+        refreshClassifier.start();
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
 }

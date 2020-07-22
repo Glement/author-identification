@@ -136,6 +136,12 @@ public class WekaClassifier implements AuthorClassifier {
                 }
             }
         }
+        try{
+            buildIfNeeded();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

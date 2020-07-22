@@ -37,7 +37,8 @@ public class ServiceUnitTest {
     @Test
     public void createProjectTest(){
         ProjectRepository projectRepository = mock(ProjectRepository.class);
-        ProjectService projectService = new ProjectService(projectRepository);
+        AuthorProjectRepository authorProjectRepository = mock(AuthorProjectRepository.class);
+        ProjectService projectService = new ProjectService(projectRepository, authorProjectRepository);
         Project project = new Project();
         project.setDescEn("a");
         project.setNameEn("b");
@@ -54,7 +55,8 @@ public class ServiceUnitTest {
     @Test
     public void deleteProjectTest(){
         ProjectRepository projectRepository = mock(ProjectRepository.class);
-        ProjectService projectService = new ProjectService(projectRepository);
+        AuthorProjectRepository authorProjectRepository = mock(AuthorProjectRepository.class);
+        ProjectService projectService = new ProjectService(projectRepository, authorProjectRepository);
         Project project = new Project();
         project.setDescEn("a");
         project.setNameEn("b");
@@ -80,7 +82,8 @@ public class ServiceUnitTest {
     @Test
     public void updateProjectTest(){
         ProjectRepository projectRepository = mock(ProjectRepository.class);
-        ProjectService projectService = new ProjectService(projectRepository);
+        AuthorProjectRepository authorProjectRepository = mock(AuthorProjectRepository.class);
+        ProjectService projectService = new ProjectService(projectRepository, authorProjectRepository);
         Project project = new Project();
         project.setDescEn("a");
         project.setNameEn("b");
@@ -95,7 +98,11 @@ public class ServiceUnitTest {
     @Test
     public void removeProjectFromAuthorTest(){
         ProjectRepository projectRepository = mock(ProjectRepository.class);
-        ProjectService projectService = new ProjectService(projectRepository);
+        AuthorProjectRepository authorProjectRepository = mock (AuthorProjectRepository.class);
+        AuthorProjectService authorProjectService = new AuthorProjectService(authorProjectRepository);
+        AuthorProject authorProject = new AuthorProject();
+
+        ProjectService projectService = new ProjectService(projectRepository, authorProjectRepository);
         Project project = new Project();
         project.setDescEn("a");
         project.setNameEn("b");
@@ -103,11 +110,7 @@ public class ServiceUnitTest {
         project.setProjectIdTk(1L);
         when(projectRepository.findById(1L)).thenReturn(java.util.Optional.of(project));
 
-        AuthorProjectRepository authorProjectRepository = mock (AuthorProjectRepository.class);
-        AuthorProjectService authorProjectService = new AuthorProjectService(authorProjectRepository);
-        AuthorProject authorProject = new AuthorProject();
         authorProject.setProject(project);
-
         AuthorRepository authorRepository = mock(AuthorRepository.class);
         AuthorService authorService = new AuthorService(authorRepository,projectRepository,authorProjectRepository);
         Author author = new Author();
@@ -124,7 +127,10 @@ public class ServiceUnitTest {
     @Test
     public void addProjectToAuthorTest(){
         ProjectRepository projectRepository = mock(ProjectRepository.class);
-        ProjectService projectService = new ProjectService(projectRepository);
+        AuthorProjectRepository authorProjectRepository = mock (AuthorProjectRepository.class);
+        AuthorProjectService authorProjectService = new AuthorProjectService(authorProjectRepository);
+        AuthorProject authorProject = new AuthorProject();
+        ProjectService projectService = new ProjectService(projectRepository, authorProjectRepository);
         Project project = new Project();
         project.setDescEn("a");
         project.setNameEn("b");
@@ -134,9 +140,7 @@ public class ServiceUnitTest {
         project.setAuthorProjects(authorProjectSet);
         when(projectRepository.findById(1L)).thenReturn(java.util.Optional.of(project));
         when(projectRepository.save(any())).thenReturn(project);
-        AuthorProjectRepository authorProjectRepository = mock (AuthorProjectRepository.class);
-        AuthorProjectService authorProjectService = new AuthorProjectService(authorProjectRepository);
-        AuthorProject authorProject = new AuthorProject();
+
         authorProject.setProject(project);
         when(authorProjectRepository.save(any())).thenReturn(authorProject);
 
@@ -159,7 +163,8 @@ public class ServiceUnitTest {
     @Test
     public void getProjectAuthorsTest(){
         ProjectRepository projectRepository = mock(ProjectRepository.class);
-        ProjectService projectService = new ProjectService(projectRepository);
+        AuthorProjectRepository authorProjectRepository = mock(AuthorProjectRepository.class);
+        ProjectService projectService = new ProjectService(projectRepository, authorProjectRepository);
         Project project = new Project();
         project.setDescEn("a");
         project.setNameEn("b");

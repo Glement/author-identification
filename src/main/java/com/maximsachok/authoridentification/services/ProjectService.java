@@ -17,9 +17,11 @@ import java.util.Optional;
 @Service
 public class ProjectService {
     private ProjectRepository projectRepository;
+    private AuthorProjectRepository authorProjectRepository;
 
     @Autowired
-    public ProjectService(ProjectRepository projectRepository) {
+    public ProjectService(ProjectRepository projectRepository, AuthorProjectRepository authorProjectRepository) {
+        this.authorProjectRepository = authorProjectRepository;
         this.projectRepository = projectRepository;
     }
 
@@ -30,6 +32,28 @@ public class ProjectService {
         project.setNameEn(projectDto.getNameEn());
         return project;
     }*/
+
+    public static ProjectDto projectToProjectDto(Project project){
+        ProjectDto projectDto = new ProjectDto();
+        projectDto.setDescEn(project.getDescEn());
+        projectDto.setKeywords(project.getKeywords());
+        projectDto.setNameEn(project.getNameEn());
+        projectDto.setId(project.getProjectIdTk());
+        return  projectDto;
+    }
+
+    public List<AuthorDto> removeAuthor(Author author, Project project){
+        List<AuthorDto> authors = new ArrayList<>();
+        for(AuthorProject authorProject : project.getAuthorProjects()){
+            if(authorProject.getAuthor().getExpertidtk().equals(author.getExpertidtk())){
+                authorProjectRepository.delete(authorProject);
+            }
+            else
+                authors.add(AuthorService.AuthorToAuthorDto(authorProject.getAuthor()));
+        }
+        return authors;
+    }
+
 
     public List<AuthorDto> getProjectAuthors(Long id){
         if(projectRepository.findById(id).isEmpty()){

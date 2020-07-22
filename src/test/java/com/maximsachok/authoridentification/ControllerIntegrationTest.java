@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 public class ControllerIntegrationTest {
+    private String API_PATH="/author-identification";
     protected MockMvc mvc;
     @Autowired
     WebApplicationContext webApplicationContext;
@@ -42,7 +43,7 @@ public class ControllerIntegrationTest {
     @Test
     public void getAuthorsList() throws Exception {
         setUp();
-        String uri = "/author";
+        String uri = API_PATH+"/author";
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri)
                 .accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
 
@@ -56,7 +57,7 @@ public class ControllerIntegrationTest {
     @Test
     public void getProjectsList() throws Exception {
         setUp();
-        String uri = "/project";
+        String uri = API_PATH+"/project";
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri)
                 .accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
 
@@ -72,7 +73,7 @@ public class ControllerIntegrationTest {
     public void getAuthorProjectsList() throws Exception {
         setUp();
         ObjectMapper objectMapper = new ObjectMapper();
-        String uri = "/author/8/projects";
+        String uri = API_PATH+"/author/8/projects";
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri)
                 .accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
         int status = mvcResult.getResponse().getStatus();
@@ -87,7 +88,7 @@ public class ControllerIntegrationTest {
     public void getProjectAuthorsList() throws Exception {
         setUp();
         ObjectMapper objectMapper = new ObjectMapper();
-        String uri = "/project/8927/authors";
+        String uri = API_PATH+"/project/8927/authors";
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri)
                 .accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
         int status = mvcResult.getResponse().getStatus();
@@ -100,14 +101,14 @@ public class ControllerIntegrationTest {
     @Test
     public void createAuthor() throws Exception {
         setUp();
-        String uri = "/author";
+        String uri = API_PATH+"/author";
         ObjectMapper objectMapper = new ObjectMapper();
         AuthorDto authorDto = new AuthorDto();
         String author = objectMapper.writeValueAsString(authorDto);
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON)
                 .content(author).accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
         int status = mvcResult.getResponse().getStatus();
-        assertEquals(200,status);
+        assertEquals(201,status);
         String content = mvcResult.getResponse().getContentAsString();
         Long authorId = objectMapper.readValue(content, new TypeReference<Long>(){});
         assertNotNull(authorId);
@@ -116,7 +117,7 @@ public class ControllerIntegrationTest {
     @Test
     public void createProject() throws Exception {
         setUp();
-        String uri = "/project";
+        String uri = API_PATH+"/project";
         ObjectMapper objectMapper = new ObjectMapper();
         ProjectDto projectDto = new ProjectDto();
         projectDto.setDescEn("a");
@@ -126,7 +127,7 @@ public class ControllerIntegrationTest {
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON)
                 .content(json).accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
         int status = mvcResult.getResponse().getStatus();
-        assertEquals(200,status);
+        assertEquals(201,status);
         String content = mvcResult.getResponse().getContentAsString();
         Long projectId = objectMapper.readValue(content, new TypeReference<Long>(){});
         assertNotNull(projectId);
@@ -135,7 +136,7 @@ public class ControllerIntegrationTest {
     @Test
     public void updateProject() throws  Exception {
         setUp();
-        String uri = "/project/7273";
+        String uri = API_PATH+"/project/7273";
         ObjectMapper objectMapper = new ObjectMapper();
         ProjectDto projectDto = new ProjectDto();
         projectDto.setDescEn("a");
@@ -153,7 +154,7 @@ public class ControllerIntegrationTest {
     @Test
     public void removeProjectFromAuthor() throws Exception {
         setUp();
-        String uri = "/author/8/project/7273";
+        String uri = API_PATH+"/author/8/project/7273";
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.delete(uri)
                 .accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
 
@@ -168,7 +169,7 @@ public class ControllerIntegrationTest {
     @Test
     public void deleteAuthor() throws Exception {
         setUp();
-        String uri = "/author/150";
+        String uri = API_PATH+"/author/150";
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.delete(uri)
                 .accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
 
@@ -179,7 +180,7 @@ public class ControllerIntegrationTest {
     @Test
     public void deleteProject() throws Exception {
         setUp();
-        String uri = "/project/2";
+        String uri = API_PATH+"/project/2";
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.delete(uri)
                 .accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
 
@@ -190,7 +191,7 @@ public class ControllerIntegrationTest {
     @Test
     public void addProjectToAuthor() throws Exception{
         setUp();
-        String uri = "/author/60/project/7273";
+        String uri = API_PATH+"/author/60/project/7273";
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri)
                 .accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
         int status = mvcResult.getResponse().getStatus();
