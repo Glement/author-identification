@@ -18,7 +18,6 @@ public class AuthorDto {
         this.id = id;
     }
 
-    @Override
     public String toString() {
         return "AuthorDto{" +
                 "id=" + id +

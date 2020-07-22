@@ -1,40 +1,42 @@
 package com.maximsachok.authoridentification.textvectorization;
 
+import com.maximsachok.authoridentification.entitys.Author;
+import com.maximsachok.authoridentification.entitys.AuthorProject;
+import com.maximsachok.authoridentification.utils.DivideTextInToSentences;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LibLINEAR;
 import weka.core.*;
-import weka.core.stemmers.LovinsStemmer;
 import weka.core.stemmers.NullStemmer;
 import weka.core.stemmers.Stemmer;
 import weka.core.tokenizers.NGramTokenizer;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.StringToWordVector;
 
-import java.io.*;
-import java.util.ArrayList;
+import java.util.*;
 
 
 /**
  * Classifier made for convenient use of WEKA API.
  * Creates model for given categories(authors) and data per author(projects).
  */
-public class TextClassifier implements Serializable {
+public class WekaClassifier implements AuthorClassifier {
     private ArrayList<Attribute> attributes;
     private ArrayList<String> classValues;
+    private Boolean upToDate;
     private Instances trainingData;
-    private Boolean upToDate = false;
+    private static Boolean initializing = false;
     private StringToWordVector filter;
     private Classifier classifier;
-    private Boolean initialized = false;
-    public TextClassifier (){
-        buildClassifier();
+    private static Boolean initialized = false;
+    private static WekaClassifier wekaClassifier=null;
+
+    public WekaClassifier(){
+        setupClassifier();
     }
 
-    public Boolean isInitialized() {
-        return initialized;
-    }
-
-    private void buildClassifier(){
+    private void setupClassifier(){
         LibLINEAR liblinear = new LibLINEAR();
         liblinear.setSVMType(new SelectedTag(0, LibLINEAR.TAGS_SVMTYPE));
         liblinear.setProbabilityEstimates(true);
@@ -60,19 +62,19 @@ public class TextClassifier implements Serializable {
         initialized = false;
     }
 
-    public void addCategory(String category) {
+    private void addCategory(String category) {
         category = category.toLowerCase();
         classValues.add(category);
     }
 
-    public void setupAfterCategorysAdded() {
+    private void setupAfterCategorysAdded() {
         attributes.add(new Attribute("@@class@@", classValues));
         // Create dataset with initial capacity of 100, and set index of class.
         trainingData = new Instances("AuthorClassification", attributes, 100);
         trainingData.setClassIndex(1);
     }
 
-    public void addData(String message, String classValue) throws IllegalStateException {
+    private void addData(String message, String classValue) throws IllegalStateException {
         message = message.toLowerCase();
         classValue = classValue.toLowerCase();
         // Make message into instance.
@@ -99,7 +101,7 @@ public class TextClassifier implements Serializable {
      * Check whether classifier and filter are up to date. Build i necessary.
      * @throws Exception
      */
-    public void buildIfNeeded() throws Exception {
+    private void buildIfNeeded() throws Exception {
         if (!upToDate) {
             // Initialize filter and tell it about the input format.
             filter.setInputFormat(trainingData);
@@ -107,15 +109,10 @@ public class TextClassifier implements Serializable {
             // Rebuild classifier.
             classifier.buildClassifier(filteredData);
             upToDate = true;
-            initialized = true;
         }
     }
 
-    public int getClassIndex(String name){
-        return classValues.indexOf(name);
-    }
-
-    public double[] classifyMessage(String message) throws Exception {
+    private double[] classifyMessage(String message) throws Exception {
         buildIfNeeded();
         Instances testSet = trainingData.stringFreeStructure();
         Instance testInstance = makeInstance(message, testSet);
@@ -124,5 +121,58 @@ public class TextClassifier implements Serializable {
         filter.input(testInstance);
         Instance filteredInstance = filter.output();
         return classifier.distributionForInstance(filteredInstance);
+    }
+
+    public void initClassifier(List<Author> authors) {
+        for(Author author : authors){
+            if(!author.getAuthorProjects().isEmpty())
+                addCategory(author.getExpertidtk().toString());
+        }
+        setupAfterCategorysAdded();
+        for(Author author : authors){
+            for(AuthorProject authorProject : author.getAuthorProjects()){
+                for(String sentence : DivideTextInToSentences.Divide(authorProject.getProject().asString())){
+                    addData(sentence, author.getExpertidtk().toString());
+                }
+            }
+        }
+    }
+
+    @Override
+    public List<ImmutablePair<Double,String>>  classifyText(String text) {
+        List<ImmutablePair<Double,String>> result = new ArrayList<>();
+        try{
+            buildIfNeeded();
+            double [] probabilities = classifyMessage(text);
+            for(int i=0; i<probabilities.length;i++){
+                result.add(new ImmutablePair<Double, String>(probabilities[i],classValues.get(i)));
+            }
+            result.sort((ImmutablePair<Double, String> a, ImmutablePair<Double, String> b) ->{
+                if(b.getKey()>a.getKey())
+                    return 1;
+                if(a.getKey().equals(b.getKey()))
+                    return 0;
+                return -1;
+            });
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+        return result.subList(0,10);
+    }
+
+    @Override
+    public double testClassifier(){
+        double result = 0;
+        try{
+            Evaluation eval = new Evaluation(trainingData);
+            eval.crossValidateModel(classifier,trainingData,10,new Random(1));
+            result = eval.correct()/trainingData.size();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return result;
     }
 }

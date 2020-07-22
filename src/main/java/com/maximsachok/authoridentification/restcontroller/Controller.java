@@ -2,6 +2,7 @@ package com.maximsachok.authoridentification.restcontroller;
 
 
 import com.maximsachok.authoridentification.dto.AuthorDto;
+import com.maximsachok.authoridentification.dto.SearchResultDto;
 import com.maximsachok.authoridentification.entitys.Author;
 import com.maximsachok.authoridentification.entitys.Project;
 import com.maximsachok.authoridentification.dto.ProjectDto;
@@ -152,12 +153,14 @@ public class Controller {
     /**
      *Finds the possible author for a given project.
      * @param project Project for which to find an author
-     * @return Returns Long id of possible author. If called during update returns "bad request".
-
+     * @return Returns List of pairs of AuthorDtio and Double of 10 most possible author. If called during update returns "accepted request" with empty list
      */
     @PostMapping("/find")
     public ResponseEntity<?> find(@Validated @RequestBody ProjectDto project) throws Exception {
-        return ResponseEntity.ok(authorService.findPossibleAuthor(project));
+        List<SearchResultDto> result = authorService.findPossibleAuthor(project);
+        if(result.size()>0)
+            return ResponseEntity.ok(result);
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/test-algorithm")
