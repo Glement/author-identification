@@ -68,12 +68,7 @@ public class Controller {
     public ResponseEntity<?> getProject(@PathVariable Long id){
         Optional<Project> project = projectService.getProject(id);
        if(project.isPresent()){
-           ProjectDto projectDto = new ProjectDto();
-           projectDto.setNameEn(project.get().getNameEn());
-           projectDto.setKeywords(project.get().getKeywords());
-           projectDto.setDescEn(project.get().getDescEn());
-           projectDto.setId(id);
-            return new ResponseEntity<>(projectDto, HttpStatus.OK);
+            return new ResponseEntity<>(ProjectService.projectToProjectDto(project.get()), HttpStatus.OK);
        }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
@@ -154,10 +149,10 @@ public class Controller {
 
     @GetMapping("/project/{id}/authors")
     public ResponseEntity<?> getProjectAuthors(@PathVariable Long id){
-        List<AuthorDto> authors;
+        Optional<List<AuthorDto>> authors;
         authors = projectService.getProjectAuthors(id);
-        if(authors!=null){
-            return new ResponseEntity<>(authors, HttpStatus.OK);
+        if(authors.isPresent()){
+            return new ResponseEntity<>(authors.get(), HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }

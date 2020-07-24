@@ -25,14 +25,6 @@ public class ProjectService {
         this.projectRepository = projectRepository;
     }
 
-   /* public  Project projectDtoToProject(ProjectDto projectDto){
-        Project project = new Project();
-        project.setDescEn(projectDto.getDescEn());
-        project.setKeywords(projectDto.getKeywords());
-        project.setNameEn(projectDto.getNameEn());
-        return project;
-    }*/
-
     public static ProjectDto projectToProjectDto(Project project){
         ProjectDto projectDto = new ProjectDto();
         projectDto.setDescEn(project.getDescEn());
@@ -55,15 +47,15 @@ public class ProjectService {
     }
 
 
-    public List<AuthorDto> getProjectAuthors(Long id){
+    public Optional<List<AuthorDto>> getProjectAuthors(Long id){
         if(projectRepository.findById(id).isEmpty()){
-            return null;
+            return Optional.empty();
         }
         List<AuthorDto> authors = new ArrayList<>();
         for(AuthorProject authorProject : projectRepository.findById(id).get().getAuthorProjects()){
             authors.add(new AuthorDto(authorProject.getAuthor().getExpertidtk()));
         }
-        return authors;
+        return Optional.of(authors);
     }
 
     public List<Project> getProjects(){
@@ -83,14 +75,18 @@ public class ProjectService {
     }
 
     public Long createProject(ProjectDto project){
-        Project project1 = new Project();
-        project1.setNameEn(project.getNameEn());
-        project1.setKeywords(project.getKeywords());
-        project1.setDescEn(project.getDescEn());
-        return projectRepository.save(project1).getProjectIdTk();
+        return projectRepository.save(ProjectService.projectDtoToProject(project)).getProjectIdTk();
     }
 
-    public Long updateProject(Project project){
-        return projectRepository.save(project).getProjectIdTk();
+    public static Project projectDtoToProject(ProjectDto projectDto){
+        Project project = new Project();
+        project.setNameEn(projectDto.getNameEn());
+        project.setKeywords(projectDto.getKeywords());
+        project.setDescEn(projectDto.getDescEn());
+        return project;
+    }
+
+    public void updateProject(Project project){
+        projectRepository.save(project);
     }
 }

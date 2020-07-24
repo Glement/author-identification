@@ -24,7 +24,7 @@ import java.util.*;
 public class WekaClassifier implements AuthorClassifier {
     private ArrayList<Attribute> attributes;
     private ArrayList<String> classValues;
-    private Boolean upToDate;
+    private Boolean upToDate = false;
     private Instances trainingData;
     private static Boolean initializing = false;
     private StringToWordVector filter;
@@ -102,6 +102,8 @@ public class WekaClassifier implements AuthorClassifier {
      * @throws Exception
      */
     private void buildIfNeeded() throws Exception {
+        if(trainingData.size()<=1)
+            return;
         if (!upToDate) {
             // Initialize filter and tell it about the input format.
             filter.setInputFormat(trainingData);
@@ -165,6 +167,8 @@ public class WekaClassifier implements AuthorClassifier {
             e.printStackTrace();
             return new ArrayList<>();
         }
+        if(result.size()<=10)
+            return result;
         return result.subList(0,10);
     }
 
