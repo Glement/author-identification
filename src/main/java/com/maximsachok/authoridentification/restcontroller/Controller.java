@@ -167,22 +167,32 @@ public class Controller {
 
     @GetMapping("/test-algorithm")
     public ResponseEntity<?> testAlgorithm(){
+        if(!authorService.isClassifierInitialized()){
+            Thread initClassifier = new Thread(() -> authorService.initClassifier());
+            initClassifier.start();
+            return new ResponseEntity<>((double) 0, HttpStatus.ACCEPTED);
+        }
         return ResponseEntity.ok(authorService.testAlgorithm());
     }
 
 
     @PostMapping("/find")
     public ResponseEntity<?> find(@Validated @RequestBody ProjectDto project){
-        if(!authorService.classifierIsInitialized()){
-            Thread initClassifier = new Thread(() -> authorService.findPossibleAuthor(project));
+        if(!authorService.isClassifierInitialized()){
+            Thread initClassifier = new Thread(() -> authorService.initClassifier());
             initClassifier.start();
-            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.ACCEPTED);
+            return new ResponseEntity<>((double) 0, HttpStatus.ACCEPTED);
         }
         return ResponseEntity.ok(authorService.findPossibleAuthor(project));
     }
     @GetMapping("/refresh-classifier")
     public ResponseEntity<?> refresh(){
-        Thread refreshClassifier = new Thread(() -> authorService.refreshClassifier());
+
+        Thread refreshClassifier = new Thread(() ->  {
+        if(!authorService.isClassifierInitialized())
+            authorService.initClassifier();
+        else
+            authorService.refreshClassifier();});
         refreshClassifier.start();
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }

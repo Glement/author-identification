@@ -75,7 +75,7 @@ public class ProjectService {
     }
 
     public Long createProject(ProjectDto project){
-        return projectRepository.save(ProjectService.projectDtoToProject(project)).getProjectIdTk();
+        return projectRepository.saveAndFlush(ProjectService.projectDtoToProject(project)).getProjectIdTk();
     }
 
     public static Project projectDtoToProject(ProjectDto projectDto){
@@ -83,6 +83,7 @@ public class ProjectService {
         project.setNameEn(projectDto.getNameEn());
         project.setKeywords(projectDto.getKeywords());
         project.setDescEn(projectDto.getDescEn());
+        project.setProjectIdTk(projectDto.getId());
         return project;
     }
 

@@ -11,7 +11,9 @@ import com.maximsachok.authoridentification.repositorys.AuthorProjectRepository;
 import com.maximsachok.authoridentification.repositorys.AuthorRepository;
 import com.maximsachok.authoridentification.repositorys.ProjectRepository;
 import com.maximsachok.authoridentification.textvectorization.AuthorClassifier;
+import com.maximsachok.authoridentification.textvectorization.AuthorClassifierWrapper;
 import com.maximsachok.authoridentification.textvectorization.WekaClassifier;
+import com.maximsachok.authoridentification.textvectorization.WekaClassifierWrapper;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,11 +29,8 @@ public class AuthorService {
     private AuthorRepository authorRepository;
     private ProjectRepository projectRepository;
     private AuthorProjectRepository authorProjectRepository;
-    private static AuthorClassifier authorClassifier;
-    private static final AtomicBoolean classifierIsInitialized = new AtomicBoolean(false);
-    private static final AtomicBoolean classifierIsInitializing = new AtomicBoolean(false);
-    private static final AtomicBoolean classifierRefreshIsRequested = new AtomicBoolean(false);
-    private static final AtomicInteger numberOfThreadsUsingClassifier = new AtomicInteger(0);
+    private static final AuthorClassifierWrapper authorClassifier = new WekaClassifierWrapper();
+
     @Autowired
     public AuthorService(AuthorRepository authorRepository, ProjectRepository projectRepository, AuthorProjectRepository authorProjectRepository) {
         this.authorRepository = authorRepository;
@@ -39,26 +38,22 @@ public class AuthorService {
         this.authorProjectRepository = authorProjectRepository;
     }
 
-    public boolean isRefreshRequested(){
-        return classifierRefreshIsRequested.get();
-    }
-
-    public static AuthorDto AuthorToAuthorDto(Author author){
+    public static AuthorDto AuthorToAuthorDto(Author author) {
         AuthorDto authorDto = new AuthorDto();
         authorDto.setId(author.getExpertidtk());
         return authorDto;
     }
 
-    public List<Author> getAuthors(){
+    public List<Author> getAuthors() {
         return authorRepository.findAll();
     }
 
-    public Optional<Author> getAuthor(Long id){
+    public Optional<Author> getAuthor(Long id) {
         return authorRepository.findById(id);
     }
 
-    public boolean deleteAuthor(Long id){
-        if(authorRepository.findById(id).isPresent()){
+    public boolean deleteAuthor(Long id) {
+        if (authorRepository.findById(id).isPresent()) {
             authorRepository.delete(authorRepository.findById(id).get());
             return true;
         }
@@ -66,33 +61,31 @@ public class AuthorService {
     }
 
 
-    public List<ProjectDto> removeProject(Author author, Project project){
+    public List<ProjectDto> removeProject(Author author, Project project) {
         List<ProjectDto> projects = new ArrayList<>();
-        for(AuthorProject authorProject : author.getAuthorProjects()){
-            if(authorProject.getProject().getProjectIdTk().equals(project.getProjectIdTk())){
+        for (AuthorProject authorProject : author.getAuthorProjects()) {
+            if (authorProject.getProject().getProjectIdTk().equals(project.getProjectIdTk())) {
                 authorProjectRepository.delete(authorProject);
-            }
-            else
+            } else
                 projects.add(ProjectService.projectToProjectDto(authorProject.getProject()));
         }
         return projects;
     }
 
-    public Long createAuthor(AuthorDto author){
+    public Long createAuthor(AuthorDto author) {
         Author author1 = new Author();
-        return authorRepository.save(author1).getExpertidtk();
+        return authorRepository.saveAndFlush(author1).getExpertidtk();
     }
 
 
-    public Optional<List<ProjectDto>> addProject(Author author, Project project){
+    public Optional<List<ProjectDto>> addProject(Author author, Project project) {
         AuthorProject authorProject = new AuthorProject();
         authorProject.setProject(project);
         authorProject.setAuthor(author);
         AuthorProjectCompositeId authorProjectCompositeId = new AuthorProjectCompositeId();
         authorProjectCompositeId.setAuthor(author.getExpertidtk());
         authorProjectCompositeId.setProject(project.getProjectIdTk());
-        if(authorProjectRepository.findById(authorProjectCompositeId).isEmpty())
-        {
+        if (authorProjectRepository.findById(authorProjectCompositeId).isEmpty()) {
             authorProject = authorProjectRepository.save(authorProject);
             author.getAuthorProjects().add(authorProject);
             authorRepository.save(author);
@@ -102,84 +95,49 @@ public class AuthorService {
         return getAuthorProjectsDto(author.getExpertidtk());
     }
 
-    public Optional<List<ProjectDto>> getAuthorProjectsDto(Long id){
-        if(authorRepository.findById(id).isEmpty()){
+    public Optional<List<ProjectDto>> getAuthorProjectsDto(Long id) {
+        if (authorRepository.findById(id).isEmpty()) {
             return Optional.empty();
         }
         List<ProjectDto> projects = new ArrayList<>();
-        for(AuthorProject authorProject : authorRepository.findById(id).get().getAuthorProjects()){
+        for (AuthorProject authorProject : authorRepository.findById(id).get().getAuthorProjects()) {
             projects.add(ProjectService.projectToProjectDto(authorProject.getProject()));
         }
         return Optional.of(projects);
     }
 
-    public double testAlgorithm(){
-        return authorClassifier.testClassifier();
-    }
-
-    private void initClassifier(){
-        if(classifierIsInitializing.get())
-            return;
-        classifierIsInitialized.set(false);
-        classifierIsInitializing.set(true);
-        List<Author> allAuthors = authorRepository.findAll();
-        authorClassifier = new WekaClassifier();
-        authorClassifier.initClassifier(allAuthors);
-        classifierIsInitializing.set(false);
-        classifierIsInitialized.set(true);
+    public double testAlgorithm() {
+        return authorClassifier.testAlgorithm();
     }
 
     /**
      * Looks through all authors and finds possible author that could have written given project, if author already have this project it is excluded from search.
+     *
      * @param project Project for which to find possible author
      * @return List of  ids of possible authors of given text, default number is 10
      */
-    public List<SearchResultDto> findPossibleAuthor(ProjectDto project){
-        if(classifierIsInitializing.get() || classifierRefreshIsRequested.get())
-            return new ArrayList<>();
-        numberOfThreadsUsingClassifier.incrementAndGet();
-        if(!classifierIsInitialized.get()){
-            initClassifier();
-        }
-        List<SearchResultDto> result = new ArrayList<>();
-        for(ImmutablePair<Double, String> pair : authorClassifier.classifyText(project.asString())){
-            AuthorDto authorDto = new AuthorDto();
-            authorDto.setId(Long.decode(pair.getValue()));
-            result.add(new SearchResultDto(authorDto, pair.getKey()));
-        }
-
-        if(numberOfThreadsUsingClassifier.decrementAndGet()==0 && classifierRefreshIsRequested.get()){
-            synchronized (numberOfThreadsUsingClassifier){
-                numberOfThreadsUsingClassifier.notify();
-            }
-        }
-        return result;
+    public List<SearchResultDto> findPossibleAuthor(ProjectDto project) {
+        return authorClassifier.findPossibleAuthor(project);
     }
 
-    public void refreshClassifier(){
-        if(classifierRefreshIsRequested.get() || classifierIsInitializing.get())
-            return;
-        classifierRefreshIsRequested.set(true);
-        synchronized (numberOfThreadsUsingClassifier){
-            try {
-                if(numberOfThreadsUsingClassifier.get()>0)
-                    numberOfThreadsUsingClassifier.wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            initClassifier();
-            classifierRefreshIsRequested.set(false);
-        }
+    public void initClassifier() {
+        authorClassifier.initClassifier(authorRepository.findAll(), new WekaClassifier());
     }
 
-    public boolean classifierIsInitialized(){
-        return classifierIsInitialized.get();
+    public void refreshClassifier() {
+        authorClassifier.refreshClassifier(authorRepository.findAll());
+    }
+
+    public Boolean isClassifierInitialized() {
+        return authorClassifier.isInitialized();
+    }
+
+    public Boolean isClassifierInitializing() {
+        return authorClassifier.isInitializing();
     }
 
 
-
-
-
-
-
+    public Boolean isClassifierRefreshRequested() {
+        return authorClassifier.isRefreshRequested();
+    }
 }

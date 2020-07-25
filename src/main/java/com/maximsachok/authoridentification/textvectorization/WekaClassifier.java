@@ -12,6 +12,7 @@ import weka.core.stemmers.NullStemmer;
 import weka.core.stemmers.Stemmer;
 import weka.core.tokenizers.NGramTokenizer;
 import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.StringToNominal;
 import weka.filters.unsupervised.attribute.StringToWordVector;
 
 import java.util.*;
@@ -27,7 +28,8 @@ public class WekaClassifier implements AuthorClassifier {
     private Boolean upToDate = false;
     private Instances trainingData;
     private static Boolean initializing = false;
-    private StringToWordVector filter;
+    private StringToWordVector filterStringToWordVector;
+    private StringToNominal filterStringToNominal;
     private Classifier classifier;
     private static Boolean initialized = false;
     private static WekaClassifier wekaClassifier=null;
@@ -38,24 +40,25 @@ public class WekaClassifier implements AuthorClassifier {
 
     private void setupClassifier(){
         LibLINEAR liblinear = new LibLINEAR();
-        liblinear.setSVMType(new SelectedTag(0, LibLINEAR.TAGS_SVMTYPE));
+        liblinear.setSVMType(new SelectedTag(1, LibLINEAR.TAGS_SVMTYPE));
         liblinear.setProbabilityEstimates(true);
         liblinear.setBias(1); // default value
         classifier = liblinear;
-        filter = new StringToWordVector();
-        filter.setWordsToKeep(500000);
-        filter.setIDFTransform(true);
-        filter.setTFTransform(true);
-        filter.setLowerCaseTokens(true);
-        filter.setOutputWordCounts(true);
-        filter.setMinTermFreq(1);
-        filter.setNormalizeDocLength(new SelectedTag(StringToWordVector.FILTER_NORMALIZE_ALL,StringToWordVector.TAGS_FILTER));
+        filterStringToNominal = new StringToNominal();
+        filterStringToWordVector = new StringToWordVector();
+        filterStringToWordVector.setWordsToKeep(500000);
+        filterStringToWordVector.setIDFTransform(true);
+        filterStringToWordVector.setTFTransform(true);
+        filterStringToWordVector.setLowerCaseTokens(true);
+        filterStringToWordVector.setOutputWordCounts(true);
+        filterStringToWordVector.setMinTermFreq(1);
+        filterStringToWordVector.setNormalizeDocLength(new SelectedTag(StringToWordVector.FILTER_NORMALIZE_ALL,StringToWordVector.TAGS_FILTER));
         NGramTokenizer t = new NGramTokenizer();
         t.setNGramMaxSize(3);
         t.setNGramMinSize(2);
-        filter.setTokenizer(t);
+        filterStringToWordVector.setTokenizer(t);
         Stemmer s = new NullStemmer();
-        filter.setStemmer(s);
+        filterStringToWordVector.setStemmer(s);
         attributes = new ArrayList<>();
         attributes.add(new Attribute("text",(ArrayList<String>)null));
         classValues = new ArrayList<>();
@@ -106,8 +109,11 @@ public class WekaClassifier implements AuthorClassifier {
             return;
         if (!upToDate) {
             // Initialize filter and tell it about the input format.
-            filter.setInputFormat(trainingData);
-            Instances filteredData = Filter.useFilter(trainingData, filter);
+            filterStringToWordVector.setInputFormat(trainingData);
+
+            Instances filteredData = Filter.useFilter(trainingData, filterStringToWordVector);
+            filterStringToNominal.setInputFormat(filteredData);
+            filteredData = Filter.useFilter(filteredData, filterStringToNominal);
             // Rebuild classifier.
             classifier.buildClassifier(filteredData);
             upToDate = true;
@@ -120,9 +126,10 @@ public class WekaClassifier implements AuthorClassifier {
         Instance testInstance = makeInstance(message, testSet);
 
         // Filter instance.
-        filter.input(testInstance);
-        Instance filteredInstance = filter.output();
-        return classifier.distributionForInstance(filteredInstance);
+        filterStringToWordVector.input(testInstance);
+        Instance filteredInstance = filterStringToWordVector.output();
+        filterStringToNominal.input(filteredInstance);
+        return classifier.distributionForInstance(filterStringToNominal.output());
     }
 
     public void initClassifier(List<Author> authors) {
@@ -173,12 +180,21 @@ public class WekaClassifier implements AuthorClassifier {
     }
 
     @Override
+    public void resetClassifier(){
+        setupClassifier();
+    }
+
+    @Override
     public double testClassifier(){
         double result = 0;
         try{
-            Evaluation eval = new Evaluation(trainingData);
-            eval.crossValidateModel(classifier,trainingData,10,new Random(1));
-            result = eval.correct()/trainingData.size();
+
+            Instances filteredData = Filter.useFilter(trainingData, filterStringToWordVector);
+            filteredData = Filter.useFilter(filteredData, filterStringToNominal);
+            Evaluation eval = new Evaluation(filteredData);
+            eval.crossValidateModel(classifier,filteredData,2,new Random(1));
+            eval.evaluateModel(classifier, filteredData);
+            result = eval.correct()/(eval.correct()+eval.incorrect());
         }
         catch (Exception e){
             e.printStackTrace();

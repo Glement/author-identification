@@ -285,7 +285,7 @@ public class ServiceUnitTest {
         authorList.add(author2);
         when(authorRepository.findAll()).thenReturn(authorList);
         List<SearchResultDto> searchResultDtoList = authorService.findPossibleAuthor(ProjectService.projectToProjectDto(project1));
-        assert(authorService.classifierIsInitialized());
+        assert(authorService.isClassifierInitialized());
         assert (searchResultDtoList.size()==2);
         assert (searchResultDtoList.get(0).getAuthorDto().getId().equals(AuthorService.AuthorToAuthorDto(author1).getId()));
     }

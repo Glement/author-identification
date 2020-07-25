@@ -9,4 +9,5 @@ public interface AuthorClassifier {
     double testClassifier();
     void initClassifier(List<Author> authors);
     List<ImmutablePair<Double,String>> classifyText(String text);
+    void resetClassifier();
 }
