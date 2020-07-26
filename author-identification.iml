@@ -148,8 +148,10 @@
     <orderEntry type="library" name="Maven: org.glassfish.jaxb:txw2:2.3.2" level="project" />
     <orderEntry type="library" name="Maven: org.jvnet.staxex:stax-ex:1.8.1" level="project" />
     <orderEntry type="library" name="Maven: com.sun.xml.fastinfoset:FastInfoset:1.2.16" level="project" />
-    <orderEntry type="library" name="Maven: nz.ac.waikato.cms.weka:LibLINEAR:1.9.7" level="project" />
+    <orderEntry type="library" name="Maven: nz.ac.waikato.cms.weka:gridSearch:1.0.12" level="project" />
     <orderEntry type="library" name="Maven: nz.ac.waikato.cms.weka:weka-dev:3.9.4" level="project" />
+    <orderEntry type="library" name="Maven: nz.ac.waikato.cms.weka:partialLeastSquares:1.0.5" level="project" />
+    <orderEntry type="library" name="Maven: nz.ac.waikato.cms.weka:LibLINEAR:1.9.7" level="project" />
     <orderEntry type="library" name="Maven: de.bwaldvogel:liblinear:2.30" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.11" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.11.1" level="project" />

@@ -40,7 +40,7 @@ public class WekaClassifier implements AuthorClassifier {
 
     private void setupClassifier(){
         LibLINEAR liblinear = new LibLINEAR();
-        liblinear.setSVMType(new SelectedTag(1, LibLINEAR.TAGS_SVMTYPE));
+        liblinear.setSVMType(new SelectedTag(0, LibLINEAR.TAGS_SVMTYPE));
         liblinear.setProbabilityEstimates(true);
         liblinear.setBias(1); // default value
         classifier = liblinear;
@@ -51,7 +51,8 @@ public class WekaClassifier implements AuthorClassifier {
         filterStringToWordVector.setTFTransform(true);
         filterStringToWordVector.setLowerCaseTokens(true);
         filterStringToWordVector.setOutputWordCounts(true);
-        filterStringToWordVector.setMinTermFreq(1);
+        filterStringToWordVector.setMinTermFreq(2);
+        filterStringToWordVector.setSaveDictionaryInBinaryForm(true);
         filterStringToWordVector.setNormalizeDocLength(new SelectedTag(StringToWordVector.FILTER_NORMALIZE_ALL,StringToWordVector.TAGS_FILTER));
         NGramTokenizer t = new NGramTokenizer();
         t.setNGramMaxSize(3);
@@ -115,6 +116,7 @@ public class WekaClassifier implements AuthorClassifier {
             filterStringToNominal.setInputFormat(filteredData);
             filteredData = Filter.useFilter(filteredData, filterStringToNominal);
             // Rebuild classifier.
+            filteredData.compactify();
             classifier.buildClassifier(filteredData);
             upToDate = true;
         }

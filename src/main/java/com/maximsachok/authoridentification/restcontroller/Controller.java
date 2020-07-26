@@ -172,7 +172,7 @@ public class Controller {
             initClassifier.start();
             return new ResponseEntity<>((double) 0, HttpStatus.ACCEPTED);
         }
-        return ResponseEntity.ok(authorService.testAlgorithm());
+        return ResponseEntity.ok(authorService.testAlgorithm()*100);
     }
 
 

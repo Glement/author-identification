@@ -10,17 +10,13 @@ import com.maximsachok.authoridentification.entitys.Project;
 import com.maximsachok.authoridentification.repositorys.AuthorProjectRepository;
 import com.maximsachok.authoridentification.repositorys.AuthorRepository;
 import com.maximsachok.authoridentification.repositorys.ProjectRepository;
-import com.maximsachok.authoridentification.textvectorization.AuthorClassifier;
 import com.maximsachok.authoridentification.textvectorization.AuthorClassifierWrapper;
 import com.maximsachok.authoridentification.textvectorization.WekaClassifier;
 import com.maximsachok.authoridentification.textvectorization.WekaClassifierWrapper;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 @Service
