@@ -5,8 +5,6 @@ import com.maximsachok.authoridentification.dto.ProjectDto;
 import com.maximsachok.authoridentification.dto.SearchResultDto;
 import com.maximsachok.authoridentification.entitys.Author;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.jboss.logging.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;

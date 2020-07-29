@@ -6,8 +6,11 @@ import com.maximsachok.authoridentification.utils.DivideTextInToSentences;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.classifiers.bayes.NaiveBayesMultinomialText;
 import weka.classifiers.functions.LibLINEAR;
+import weka.classifiers.lazy.IBk;
 import weka.core.*;
+import weka.core.stemmers.LovinsStemmer;
 import weka.core.stemmers.NullStemmer;
 import weka.core.stemmers.Stemmer;
 import weka.core.tokenizers.NGramTokenizer;
@@ -27,12 +30,10 @@ public class WekaClassifier implements AuthorClassifier {
     private ArrayList<String> classValues;
     private Boolean upToDate = false;
     private Instances trainingData;
-    private static Boolean initializing = false;
     private StringToWordVector filterStringToWordVector;
     private StringToNominal filterStringToNominal;
     private Classifier classifier;
-    private static Boolean initialized = false;
-    private static WekaClassifier wekaClassifier=null;
+    private Boolean initialized = false;
 
     public WekaClassifier(){
         setupClassifier();
@@ -44,6 +45,7 @@ public class WekaClassifier implements AuthorClassifier {
         liblinear.setProbabilityEstimates(true);
         liblinear.setBias(1); // default value
         classifier = liblinear;
+        classifier = new IBk();
         filterStringToNominal = new StringToNominal();
         filterStringToWordVector = new StringToWordVector();
         filterStringToWordVector.setWordsToKeep(500000);
@@ -119,6 +121,7 @@ public class WekaClassifier implements AuthorClassifier {
             filteredData.compactify();
             classifier.buildClassifier(filteredData);
             upToDate = true;
+            initialized = true;
         }
     }
 
@@ -188,13 +191,15 @@ public class WekaClassifier implements AuthorClassifier {
 
     @Override
     public double testClassifier(){
-        double result = 0;
+        if(!initialized)
+            return 0d;
+        double result = 0d;
         try{
 
             Instances filteredData = Filter.useFilter(trainingData, filterStringToWordVector);
             filteredData = Filter.useFilter(filteredData, filterStringToNominal);
             Evaluation eval = new Evaluation(filteredData);
-            eval.crossValidateModel(classifier,filteredData,2,new Random(1));
+            eval.crossValidateModel(classifier,filteredData,4,new Random(1));
             eval.evaluateModel(classifier, filteredData);
             result = eval.correct()/(eval.correct()+eval.incorrect());
         }

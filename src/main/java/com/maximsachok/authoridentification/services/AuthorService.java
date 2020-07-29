@@ -74,6 +74,13 @@ public class AuthorService {
     }
 
 
+    /**
+     * Adds project to author projects
+     *
+     * @param author author to which to add project
+     * @param project project to add
+     * @return
+     */
     public Optional<List<ProjectDto>> addProject(Author author, Project project) {
         AuthorProject authorProject = new AuthorProject();
         authorProject.setProject(project);
@@ -110,7 +117,7 @@ public class AuthorService {
      * Looks through all authors and finds possible author that could have written given project, if author already have this project it is excluded from search.
      *
      * @param project Project for which to find possible author
-     * @return List of  ids of possible authors of given text, default number is 10
+     * @return List of  SearchResultDto, contains AuthorDto and its score, of possible authors for given text, default size is 10, can be smaller if there isn't enough authors in database
      */
     public List<SearchResultDto> findPossibleAuthor(ProjectDto project) {
         return authorClassifier.findPossibleAuthor(project);

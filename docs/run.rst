@@ -33,3 +33,15 @@ Or this command for your specified database
 .. code-block:: none
 
 	mvn spring-boot:run package -P production
+
+
+GUI App
+#######
+
+If you want to use some visual representation, you can use the Vaadin application that runs on localhost:9090. Use this command to run it
+
+.. code-block:: none
+
+    mvn jetty:run
+
+To launch the Vaadin application.

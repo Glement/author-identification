@@ -31,7 +31,7 @@ public class ServiceUnitTest {
         AuthorService authorService = new AuthorService(authorRepository,null,null);
         Author author = new Author();
         author.setExpertidtk(1L);
-        when(authorRepository.save(any())).thenReturn(author);
+        when(authorRepository.saveAndFlush(any())).thenReturn(author);
         assertEquals(authorService.createAuthor(null),author.getExpertidtk());
     }
 
@@ -49,7 +49,7 @@ public class ServiceUnitTest {
         projectDto.setDescEn("a");
         projectDto.setNameEn("b");
         projectDto.setKeywords("c");
-        when(projectRepository.save(any())).thenReturn(project);
+        when(projectRepository.saveAndFlush(any())).thenReturn(project);
         assertEquals(projectService.createProject(projectDto),project.getProjectIdTk());
     }
 
@@ -241,54 +241,7 @@ public class ServiceUnitTest {
         assert (authorList.isEmpty());
     }
 
-    @Test
-    public void findPossibleAuthor(){
-        AuthorRepository authorRepository = mock(AuthorRepository.class);
-        ProjectRepository projectRepository = mock(ProjectRepository.class);
-        AuthorProjectRepository authorProjectRepository = mock(AuthorProjectRepository.class);
-        AuthorService authorService = new AuthorService(authorRepository, projectRepository, authorProjectRepository);
 
-        Author author1 = new Author();
-        author1.setExpertidtk(1L);
-
-        Author author2 = new Author();
-        author2.setExpertidtk(2L);
-
-        Project project1 = new Project();
-        project1.setProjectIdTk(1L);
-        project1.setNameEn("A cat is a cat");
-        project1.setDescEn("Cat will be the cat");
-        project1.setKeywords("Cat");
-
-        Project project2 = new Project();
-        project2.setProjectIdTk(2L);
-        project2.setNameEn("A dog is a dog");
-        project2.setDescEn("dog will be the dog");
-        project2.setKeywords("Dog");
-        List<Author> authorList = new ArrayList<>();
-
-        AuthorProject authorProject1 = new AuthorProject();
-        authorProject1.setProject(project1);
-        authorProject1.setAuthor(author1);
-        Set<AuthorProject> authorProjectSet1 = new HashSet<>();
-        authorProjectSet1.add(authorProject1);
-        author1.setAuthorProjects(authorProjectSet1);
-
-        AuthorProject authorProject2 = new AuthorProject();
-        authorProject2.setProject(project2);
-        authorProject2.setAuthor(author2);
-        Set<AuthorProject> authorProjectSet2 = new HashSet<>();
-        authorProjectSet2.add(authorProject2);
-        author2.setAuthorProjects(authorProjectSet2);
-
-        authorList.add(author1);
-        authorList.add(author2);
-        when(authorRepository.findAll()).thenReturn(authorList);
-        List<SearchResultDto> searchResultDtoList = authorService.findPossibleAuthor(ProjectService.projectToProjectDto(project1));
-        assert(authorService.isClassifierInitialized());
-        assert (searchResultDtoList.size()==2);
-        assert (searchResultDtoList.get(0).getAuthorDto().getId().equals(AuthorService.AuthorToAuthorDto(author1).getId()));
-    }
 
     @Test
     public void authorToAuthorDtoTest(){

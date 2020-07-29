@@ -20,6 +20,7 @@ public interface AuthorClassifierWrapper {
     double testAlgorithm();
 
     void initClassifier(List<Author> allAuthors, AuthorClassifier authorClassifier);
+    
     List<SearchResultDto> findPossibleAuthor(ProjectDto project);
 
     void refreshClassifier(List<Author> allAuthors);
