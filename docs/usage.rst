@@ -34,7 +34,7 @@ To test algorithm on your dataset you can send **GET** request to **localhost:80
 Response is either the Double with the accuracy in percent with HTTP OK response or Accepted HTTP code if classifier is not yet initialized.
 
 Refresh algorithm
---------------
+-----------------
 
 To refresh algorithm you can send **GET** request to **localhost:8080/author-identification/refresh-classifier**.
 Response is HTTP ACCEPTED.
