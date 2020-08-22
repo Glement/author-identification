@@ -4,8 +4,10 @@ import com.maximsachok.authoridentification.dto.AuthorDto;
 import com.maximsachok.authoridentification.dto.ProjectDto;
 import com.maximsachok.authoridentification.entitys.Author;
 import com.maximsachok.authoridentification.entitys.AuthorProject;
+import com.maximsachok.authoridentification.entitys.AuthorProjectCompositeId;
 import com.maximsachok.authoridentification.entitys.Project;
 import com.maximsachok.authoridentification.repositorys.AuthorProjectRepository;
+import com.maximsachok.authoridentification.repositorys.AuthorRepository;
 import com.maximsachok.authoridentification.repositorys.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,11 +20,13 @@ import java.util.Optional;
 public class ProjectService {
     private ProjectRepository projectRepository;
     private AuthorProjectRepository authorProjectRepository;
+    private AuthorRepository authorRepository;
 
     @Autowired
-    public ProjectService(ProjectRepository projectRepository, AuthorProjectRepository authorProjectRepository) {
+    public ProjectService(ProjectRepository projectRepository, AuthorProjectRepository authorProjectRepository, AuthorRepository authorRepository) {
         this.authorProjectRepository = authorProjectRepository;
         this.projectRepository = projectRepository;
+        this.authorRepository = authorRepository;
     }
 
     public static ProjectDto projectToProjectDto(Project project){
@@ -34,6 +38,12 @@ public class ProjectService {
         return  projectDto;
     }
 
+    /**
+     * Removes author from project
+     * @param author author to remove
+     * @param project project from which to remove an author
+     * @return list of authors for this project
+     */
     public List<AuthorDto> removeAuthor(Author author, Project project){
         List<AuthorDto> authors = new ArrayList<>();
         for(AuthorProject authorProject : project.getAuthorProjects()){
@@ -44,6 +54,30 @@ public class ProjectService {
                 authors.add(AuthorService.AuthorToAuthorDto(authorProject.getAuthor()));
         }
         return authors;
+    }
+
+    /**
+     * Adds author to project authors
+     *
+     * @param author author which to add
+     * @param project project to which to add an author
+     * @return list of Authors
+     */
+    public Optional<List<AuthorDto>> addAuthor(Author author, Project project) {
+        AuthorProject authorProject = new AuthorProject();
+        authorProject.setProject(project);
+        authorProject.setAuthor(author);
+        AuthorProjectCompositeId authorProjectCompositeId = new AuthorProjectCompositeId();
+        authorProjectCompositeId.setAuthor(author.getExpertidtk());
+        authorProjectCompositeId.setProject(project.getProjectIdTk());
+        if (authorProjectRepository.findById(authorProjectCompositeId).isEmpty()) {
+            authorProject = authorProjectRepository.save(authorProject);
+            author.getAuthorProjects().add(authorProject);
+            authorRepository.save(author);
+            project.getAuthorProjects().add(authorProject);
+            projectRepository.save(project);
+        }
+        return getProjectAuthors(project.getProjectIdTk());
     }
 
 

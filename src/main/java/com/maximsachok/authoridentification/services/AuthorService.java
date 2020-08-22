@@ -56,7 +56,12 @@ public class AuthorService {
         return false;
     }
 
-
+    /**
+     * Removes project from author
+     * @param author author from which to remove project
+     * @param project project to remove
+     * @return List of author projects
+     */
     public List<ProjectDto> removeProject(Author author, Project project) {
         List<ProjectDto> projects = new ArrayList<>();
         for (AuthorProject authorProject : author.getAuthorProjects()) {
@@ -79,7 +84,7 @@ public class AuthorService {
      *
      * @param author author to which to add project
      * @param project project to add
-     * @return
+     * @return returns list of projects for an author
      */
     public Optional<List<ProjectDto>> addProject(Author author, Project project) {
         AuthorProject authorProject = new AuthorProject();

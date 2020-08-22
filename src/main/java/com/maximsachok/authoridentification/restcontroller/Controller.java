@@ -54,12 +54,7 @@ public class Controller {
     public ResponseEntity<?> getProjects(){
         List<ProjectDto> projectDtoList = new ArrayList<>();
         for(Project project : projectService.getProjects()){
-            ProjectDto projectDto = new ProjectDto();
-            projectDto.setNameEn(project.getNameEn());
-            projectDto.setKeywords(project.getKeywords());
-            projectDto.setDescEn(project.getDescEn());
-            projectDto.setId(project.getProjectIdTk());
-            projectDtoList.add(projectDto);
+            projectDtoList.add(ProjectService.projectToProjectDto(project));
         }
         return ResponseEntity.ok(projectDtoList);
     }
@@ -143,8 +138,8 @@ public class Controller {
 
     /**
      *
-     * @param projectDto
-     * @param id
+     * @param projectDto new project data
+     * @param id projects id
      * @return either the updated project and OK status or NOT_FOUND status if project not found.
      */
     @Transactional
@@ -173,6 +168,21 @@ public class Controller {
     public ResponseEntity<?> addProjectToAuthor(@PathVariable Long aid, @PathVariable Long pid){
         if(authorService.getAuthor(aid).isPresent() && projectService.getProject(pid).isPresent()){
             return new ResponseEntity<>(authorService.addProject(authorService.getAuthor(aid).get(),projectService.getProject(pid).get()), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     *
+     * @param aid author id
+     * @param pid project id
+     * @return list of project authors with status OK or status NOT_FOUND if author or project are not found
+     */
+    @Transactional
+    @PutMapping("/project/{pid}/author/{aid}")
+    public ResponseEntity<?> addAuthorToProject(@PathVariable Long aid, @PathVariable Long pid){
+        if(authorService.getAuthor(aid).isPresent() && projectService.getProject(pid).isPresent()){
+            return new ResponseEntity<>(projectService.addAuthor(authorService.getAuthor(aid).get(),projectService.getProject(pid).get()), HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
