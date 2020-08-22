@@ -15,3 +15,6 @@ This app is a Spring Boot app that is accessed by REST api. It is written with e
 You can modify them to suit your database.
 
 
+For data you can use for example https://www.rvvi.cz/riv
+
+
