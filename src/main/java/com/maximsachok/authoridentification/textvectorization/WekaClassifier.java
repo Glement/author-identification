@@ -45,7 +45,6 @@ public class WekaClassifier implements AuthorClassifier {
         liblinear.setProbabilityEstimates(true);
         liblinear.setBias(1); // default value
         classifier = liblinear;
-        classifier = new IBk();
         filterStringToNominal = new StringToNominal();
         filterStringToWordVector = new StringToWordVector();
         filterStringToWordVector.setWordsToKeep(500000);
@@ -104,7 +103,7 @@ public class WekaClassifier implements AuthorClassifier {
     }
 
     /**
-     * Check whether classifier and filter are up to date. Build i necessary.
+     * Check whether classifier and filter are up to date. Build if necessary.
      * @throws Exception
      */
     private void buildIfNeeded() throws Exception {
